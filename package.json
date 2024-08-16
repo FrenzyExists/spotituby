@@ -1,0 +1,20 @@
+{
+  "name": "music-downloader",
+  "version": "0.0.1",
+  "description": "A minimalist CLI to download your favorite Spotify playlists directly unto your device",
+  "main": "index.ts",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Detective Pikachu",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.4",
+    "typescript": "^5.5.4"
+  },
+  "dependencies": {
+    "youtubei.js": "^5.0.1"
+  }
+}

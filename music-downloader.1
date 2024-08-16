@@ -1,0 +1,56 @@
+.\" Manpage for musictool
+.\" Original manpage by [Your Name or Organization]
+.\" Please adjust and add information as necessary.
+.TH MUSICTOOL 1 "August 2024" "1.0" "User Commands"
+.SH NAME
+musictool \- Download music from Spotify playlists
+.SH SYNOPSIS
+.B musictool
+[\fIOPTION\fR]...
+.SH DESCRIPTION
+.B musictool
+is a command-line tool for downloading music from Spotify playlists. When run with no parameters, it initiates an interactive wizard for first-time users.
+
+Subsequent runs or advanced users can utilize various options to specify playlists, filter content, and set download directories.
+.SH OPTIONS
+.TP
+.BI \-h , \--help
+Display this help message and exit.
+.TP
+.BI \-p PLAYLIST
+Specify the playlist name or ID to download. This overrides the interactive wizard's playlist selection. Example: \fB\-p "My Favorite Playlist"\fR or \fB\-p "1234567890abcdef"\fR
+.TP
+.BI \-q QUERY
+Query the playlist with basic filters. For example, \fB\-q "Post Malone"\fR filters songs by the artist. You can combine this with \fB\-p\fR to narrow down the results from a specified playlist.
+.TP
+.BI \-d DIRECTORY
+Specify the directory where the music files will be saved. The default directory is \fB~/Music\fR. Example: \fB\-d "/path/to/my/music"\fR
+.TP
+.B --wizard
+Start an interactive wizard to guide you through the process of downloading music. This is the default behavior if no parameters are provided.
+.SH EXAMPLES
+.TP
+1. Run the interactive wizard to start downloading music:
+.B musictool
+.TP
+2. Download music from a specific playlist by name:
+.B musictool -p "My Favorite Playlist"
+.TP
+3. Download music from a specific playlist by ID and filter by artist:
+.B musictool -p "1234567890abcdef" -q "Post Malone"
+.TP
+4. Download music from a playlist and save it to a specified directory:
+.B musictool -p "My Favorite Playlist" -d "/home/user/Downloads"
+.TP
+5. Filter songs in a playlist by artist and specify the save directory:
+.B musictool -p "1234567890abcdef" -q "Post Malone" -d "/home/user/Music"
+.SH NOTES
+Ensure that you have valid Spotify credentials and access rights for the playlists you wish to download.
+
+The first time you run musictool without parameters, it will prompt you for your Spotify credentials and guide you through selecting a playlist and download options.
+.SH AUTHOR
+Developed by [Your Name or Organization].
+.SH REPORTING BUGS
+Report bugs to <support@example.com>.
+.SH SEE ALSO
+spotify(1), curl(1), wget(1)
