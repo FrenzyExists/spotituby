@@ -23,6 +23,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const serverPath = resolve(__dirname, "src", "server.js");
 
 const downloadWithYtDlp = (url, outputDir, yt_type) => {
+  console.log("DJDJODJJDJOJDOJOAJO");
+
   const getCommand = `yt-dlp --flat-playlist "${url}" --dump-json "${url}"`;
 
   if (yt_type === "yt-playlist") {
@@ -76,6 +78,8 @@ const downloadWithYtDlp = (url, outputDir, yt_type) => {
                 `yt-dlp ${v.url} -x --audio-format mp3 -o "${outputDir}/%(title)s.%(ext)s"`
               );
             });
+            //////////////////////// Finish this later
+
           } else {
             const progressBar = new SingleBar(
               {
@@ -126,6 +130,48 @@ const downloadWithYtDlp = (url, outputDir, yt_type) => {
     });
   } else if (yt_type === "yt-track") {
     console.log("Downloading track...");
+    const progressBar = new SingleBar(
+      {
+        format: "Downloading |{bar}| {percentage}% || {total}MiB"
+      },
+      Presets.shades_classic
+    );
+
+    const process = exec(
+      `yt-dlp ${url} -x --audio-format mp3 -o "${outputDir}/%(title)s.%(ext)s"`
+    );
+
+    let total = 100;
+    process.stdio[1].on("data", (data) => {
+      const matchTotal = data.toString().match(/(\d+\.\d+MiB)/);
+      if (matchTotal) {
+        total = parseFloat(matchTotal[1].replace("MiB", ""));
+
+        if (!progressBar.isActive) {
+          progressBar.start(total, 0);
+        }
+      }
+
+      const match = data.toString().match(/(\d+\.\d+%)/);
+      if (match) {
+        const downloaded =
+          (parseFloat(match[1].replace("%", "")) / 100) * total;
+
+        progressBar.update(downloaded);
+      }
+    });
+
+    process.on("close", (code) => {
+      if (code === 0) {
+        progressBar.stop();
+        console.log("Download completed successfully!");
+      } else {
+        progressBar.stop();
+        console.error(`Download failed with code ${code}`);
+      }
+    });
+
+
   } else {
     console.log("Unknown type");
     return;
@@ -166,8 +212,6 @@ const navigateSpotify = async (token) => {
 const navigateSpotifyTracks = async (token, playlistId) => {
   const tracks = await fetchPlaylistTracks(token, playlistId);
 
-  console.log(tracks.items[0]);
-  console.log(tracks.items[0].track.name);
   let choices = tracks.items.map((t) => {
     return {
       name: t.track.name,
@@ -200,7 +244,7 @@ const navigateSpotifyTracks = async (token, playlistId) => {
   } else {
     console.log("Downloading selected track...");
     const selectedTracks = await checkbox({
-      message: "Select tracks to download",
+      message: "🎶 Select your songs 🎶",
       choices: choices,
       validate: (ans) => {
         if (ans.length === 0) {
@@ -259,12 +303,12 @@ const cliMode = async (url) => {
     const test = await fetchMe(token);
 
     if (test === null) {
-      console.log("Invalid token found");
+      console.log("Invalid Spotify token found");
       token = null;
     }
   }
 
-  if (urlMode === "yt-playlist") {
+  if (urlMode === "yt-playlist" || urlMode === "yt-track") {
     downloadWithYtDlp(url, "./downloads", urlMode);
   } else if (
     urlMode === "sy-playlist" ||
