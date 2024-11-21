@@ -1,1 +1,5 @@
 node_modules/
+*.venv
+.token
+.env
+/downloads
