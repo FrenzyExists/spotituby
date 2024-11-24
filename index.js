@@ -95,6 +95,7 @@ const downloadWithYtDlp = (url, outputDir, yt_type) => {
               );
             });
             //////////////////////// Finish this later
+            // TODO: Remove progressbar, use default kanpilotID(j3872mf9gwyifyk09wyyj84z)
           } else {
             const progressBar = new SingleBar({
                 format: "Downloading |{bar}| {percentage}% || {total}MiB"

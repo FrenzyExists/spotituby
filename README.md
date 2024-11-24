@@ -63,13 +63,15 @@ Ensure the following dependencies are installed:
 
 > NOTE: This script has only been tested on Mac, beware
 
-4. Configure Spotify API credentials:
-   ```env
-   SPOTIFY_CLIENT_ID=<your-client-id>
-   SPOTIFY_CLIENT_SECRET=<your-client-secret>
-   ```
-   Save this information in a `.env` file in the root directory.
-
+4. Set up Spotify API credentials:
+   - Visit [Spotify Developer Dashboard](https://developer.spotify.com/dashboard/applications).
+   - Create a new app and note the `Client ID` and `Client Secret`.
+   - Add the redirect URI: `http://localhost:3000/callback`.
+   - Save your credentials in a `.env` file in the root directory of this app:
+     ```env
+     SPOTIFY_CLIENT_ID=<your-client-id>
+     SPOTIFY_CLIENT_SECRET=<your-client-secret>
+     ```
 ---
 
 ## Usage
