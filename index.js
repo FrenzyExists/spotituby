@@ -1,4 +1,9 @@
-import { select, confirm, checkbox } from "@inquirer/prompts";
+import {
+  select,
+  confirm,
+  checkbox,
+  input
+} from "@inquirer/prompts";
 import {
   identifyUrlType,
   fetchMe,
@@ -7,14 +12,30 @@ import {
   searchAndDownloadYTTrack,
   TOKENFILE
 } from "./src/utils/index.js";
-import { Command } from "commander";
-import { fileURLToPath } from "url";
-import { dirname, resolve } from "path";
-import { exec, fork, spawn } from "child_process";
-import { SingleBar, Presets } from "cli-progress";
+import {
+  Command
+} from "commander";
+import {
+  fileURLToPath
+} from "url";
+import {
+  dirname,
+  resolve
+} from "path";
+import {
+  exec,
+  fork,
+  spawn
+} from "child_process";
+import {
+  SingleBar,
+  Presets
+} from "cli-progress";
 import fs from "fs";
+
 import open from "open";
-import { io } from "socket.io-client";
+import puppeteer from "puppeteer";
+
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -45,12 +66,10 @@ const downloadWithYtDlp = (url, outputDir, yt_type) => {
             name: v.title,
             value: v.url
           }))
-          .concat([
-            {
-              name: "All videos",
-              value: null
-            }
-          ]);
+          .concat([{
+            name: "All videos",
+            value: null
+          }]);
 
         checkbox({
           message: `Found ${playlistVideos.length} videos in the playlist.\nSelect a song to download`,
@@ -63,8 +82,8 @@ const downloadWithYtDlp = (url, outputDir, yt_type) => {
           }
         }).then((ans) => {
           if (ans === null) {
-            const progressBar = new SingleBar(
-              {
+            // TODO: Remove the progressbar and use the yt-dlp progress bar
+            const progressBar = new SingleBar({
                 format: "Downloading |{bar}| {percentage}% || {total}MiB"
               },
               Presets.shades_classic
@@ -77,8 +96,7 @@ const downloadWithYtDlp = (url, outputDir, yt_type) => {
             });
             //////////////////////// Finish this later
           } else {
-            const progressBar = new SingleBar(
-              {
+            const progressBar = new SingleBar({
                 format: "Downloading |{bar}| {percentage}% || {total}MiB"
               },
               Presets.shades_classic
@@ -126,8 +144,7 @@ const downloadWithYtDlp = (url, outputDir, yt_type) => {
     });
   } else if (yt_type === "yt-track") {
     console.log("Downloading track...");
-    const progressBar = new SingleBar(
-      {
+    const progressBar = new SingleBar({
         format: "Downloading |{bar}| {percentage}% || {total}MiB"
       },
       Presets.shades_classic
@@ -212,30 +229,30 @@ const navigateSpotifyTracks = async (token, playlistId) => {
     }
 
     const choices = tracks.items
-    .map((t) => {
-      return {
-        name: `${t.track.name} - ${t.track.artists.map((a) => a.name).join(", ")}`, // Visible to user
-        value: {
-      name: t.track.name,
-      name: t.track.name,
-      duration_ms: t.track.duration_ms,
-          name: t.track.name,
-      duration_ms: t.track.duration_ms,
-          artist: t.track.artists.map((a) => a.name),
-          album: t.track.album.name,
-          duration_ms: t.track.duration_ms,
-          image: t.track.album.images?.[0]?.url || "",
-          album_url: t.track.album.href,
-          external_url: t.track.external_urls.spotify,
-          popularity: t.track.popularity,
-          disk_number: t.track.disc_number,
-          track_number: t.track.track_number,
-          release_date: t.track.album.release_date,
-          type: t.track.type,
-        },
-      };
-    });
-  
+      .map((t) => {
+        return {
+          name: `${t.track.name} - ${t.track.artists.map((a) => a.name).join(", ")}`, // Visible to user
+          value: {
+            name: t.track.name,
+            name: t.track.name,
+            duration_ms: t.track.duration_ms,
+            name: t.track.name,
+            duration_ms: t.track.duration_ms,
+            artist: t.track.artists.map((a) => a.name),
+            album: t.track.album.name,
+            duration_ms: t.track.duration_ms,
+            image: t.track.album.images?.[0]?.url || "",
+            album_url: t.track.album.href,
+            external_url: t.track.external_urls.spotify,
+            popularity: t.track.popularity,
+            disk_number: t.track.disc_number,
+            track_number: t.track.track_number,
+            release_date: t.track.album.release_date,
+            type: t.track.type,
+          },
+        };
+      });
+
     if (choices.length === 0) {
       throw new Error("No valid tracks found to process.");
     }
@@ -262,7 +279,7 @@ const navigateSpotifyTracks = async (token, playlistId) => {
         },
       });
     }
-    
+
     selectedTracks.forEach((t) => {
       if (!t.artist || t.artist.length === 0) {
         console.warn(`Skipping track: ${t.name} due to missing artist information.`);
@@ -309,6 +326,76 @@ const serverMode = (url) => {
 
 //////////////////////////////////////////////////////////////////////////////
 
+
+async function loginToSpotify() {
+  let browser = await puppeteer.launch({
+    headless: true
+  });
+  const page = await browser.newPage();
+
+  await page.goto('http://localhost:3000/login');
+  // page.on('response', async (response) => {
+  //     const url = response.url();
+  //     if (url.includes('/callback')) { // This is the callback URL
+  //         const responseBody = await response.json(); // Assuming the token is returned as JSON
+  //         if (responseBody && responseBody.token) {
+  //             console.log('Token received:', responseBody.token);
+  //             // You can save the token to a file or process it here
+  //             await browser.close(); // Close the browser if token is found
+  //         } else {
+  //             console.log('No token found in callback response');
+  //         }
+  //     }
+  // });
+
+  const username = await input({
+    message: "Enter your username:",
+  });
+  const password = await input({
+    message: "Enter your password:",
+    type: "password",
+  });
+
+  // Wait for the username and password fields to load
+  await page.waitForSelector('#login-username', {
+    visible: true
+  });
+  await page.waitForSelector('#login-password', {
+    visible: true
+  });
+
+  // Fill in the login form and submit
+  await page.type('#login-username', username);
+  await page.type('#login-password', password);
+
+  // Click the login button
+  await page.click('#login-button');
+
+  console.log("Logging in...");
+
+  try {
+    const errorMessage = await page.waitForSelector('.sc-gLXSEc.eZHyFP', {
+      visible: true,
+      timeout: 5000
+    }).catch(() => null);
+
+    if (errorMessage) {
+      console.log('Login failed. Please check your credentials.');
+      await browser.close();
+      return false;
+    } else {
+      console.log('Login successful!');
+      browser.close();
+      return true;
+    }
+  } catch (error) {
+    console.error('An error occurred during login:', error);
+    await browser.close();
+    return false;
+  }
+}
+
+
 const cliMode = async (url) => {
   const urlMode = identifyUrlType(url);
   let token = null;
@@ -332,34 +419,21 @@ const cliMode = async (url) => {
     urlMode === null
   ) {
     if (token === null) {
-    const socket = io("http://localhost:3000/login", {autoConnect: true});
-      socket.on("connect", () => {
-        console.log("Using the socket thingy");
-      });
-
-      socket.c
-
-      // socket.on("message", async (authorizationCode) => {
-      //   console.log("Authorization code received");
-      //   token = authorizationCode;
-      //   socket.disconnect();
-      //   const playlist = await navigateSpotify(token);
-      //   console.log(
-      //     `🎵 ${playlist.name} contains ${playlist.tracks.total} tracks! 🎶`
-      //   );
-      //   navigateSpotifyTracks(token, playlist.id);
-      // });
-
       const server = fork(serverPath);
-      console.log("Server stardddted");
-      console.log(token);
-      console.log("Server sddtarted");
+      const sleep = async ms => new Promise(r => setTimeout(r, ms));
 
-      server.on("spawn", () => {
+      await sleep(2000);
+      const login = await loginToSpotify();
+      if (!login) {
+        console.log("Failed to login");
+        server.kill();
+        process.exit(1);
+      }
+
+      server.on("spawn", async () => {
         console.log(
           "Server started\nlog in to your spotify account on http://localhost:3000/login"
         );
-        open('http://localhost:3000/login');
       });
 
       server.on("message", async (authorizationCode) => {
@@ -368,9 +442,10 @@ const cliMode = async (url) => {
 
         // Save token to file
         fs.writeFileSync(TOKENFILE, token);
-        server.kill(); // Kill the server process once done
-        const playlistId = await navigateSpotify(token);
-        navigateSpotifyTracks(token, playlistId);
+        const playlist = await navigateSpotify(token);
+        navigateSpotifyTracks(token, playlist.id);
+
+        server.kill();
       });
     } else {
       console.log("Token found - skipping login");
@@ -396,11 +471,11 @@ const cliMode = async (url) => {
  */
 const main = () => {
   console.log(`
-    \x1b[34m====================================\x1b[0m
-    \x1b[34m  Spotituby: Revolutionizing Music  \x1b[0m
-    \x1b[34m  That One Downloader You Need.  \x1b[0m
-    \x1b[34m====================================\x1b[0m
-  `);
+  \x1b[34m====================================\x1b[0m
+  \x1b[34m  Spotituby: Revolutionizing Music  \x1b[0m
+  \x1b[34m  That One Downloader You Need.  \x1b[0m
+  \x1b[34m====================================\x1b[0m
+`);
 
   const program = new Command();
   program
@@ -415,12 +490,12 @@ const main = () => {
     .addHelpText(
       "after",
       `
-      Examples:
-      spotituby --mode cli --url https://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI
-      spotituby --mode cli --url https://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji
-      spotituby --mode server --url https://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI
-      spotituby --mode server --url https://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji
-      `
+    Examples:
+    spotituby --mode cli --url https://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI
+    spotituby --mode cli --url https://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji
+    spotituby --mode server --url https://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI
+    spotituby --mode server --url https://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji
+    `
     );
 
   program.parse(process.argv);
