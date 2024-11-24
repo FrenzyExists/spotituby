@@ -1,5 +1,3 @@
-// const fs = require("fs");
-// const { Command } = require("commander");
 import { select, confirm, checkbox } from "@inquirer/prompts";
 import {
   identifyUrlType,
@@ -15,7 +13,8 @@ import { dirname, resolve } from "path";
 import { exec, fork, spawn } from "child_process";
 import { SingleBar, Presets } from "cli-progress";
 import fs from "fs";
-import axios from "axios";
+import open from "open";
+import { io } from "socket.io-client";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -23,8 +22,6 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const serverPath = resolve(__dirname, "src", "server.js");
 
 const downloadWithYtDlp = (url, outputDir, yt_type) => {
-  console.log("DJDJODJJDJOJDOJOAJO");
-
   const getCommand = `yt-dlp --flat-playlist "${url}" --dump-json "${url}"`;
 
   if (yt_type === "yt-playlist") {
@@ -79,7 +76,6 @@ const downloadWithYtDlp = (url, outputDir, yt_type) => {
               );
             });
             //////////////////////// Finish this later
-
           } else {
             const progressBar = new SingleBar(
               {
@@ -170,8 +166,6 @@ const downloadWithYtDlp = (url, outputDir, yt_type) => {
         console.error(`Download failed with code ${code}`);
       }
     });
-
-
   } else {
     console.log("Unknown type");
     return;
@@ -210,53 +204,75 @@ const navigateSpotify = async (token) => {
 };
 
 const navigateSpotifyTracks = async (token, playlistId) => {
-  const tracks = await fetchPlaylistTracks(token, playlistId);
+  try {
+    const tracks = await fetchPlaylistTracks(token, playlistId);
 
-  let choices = tracks.items.map((t) => {
-    return {
+    if (!tracks || !tracks.items) {
+      throw new Error("No tracks found in the playlist.");
+    }
+
+    const choices = tracks.items
+    .map((t) => {
+      return {
+        name: `${t.track.name} - ${t.track.artists.map((a) => a.name).join(", ")}`, // Visible to user
+        value: {
+      name: t.track.name,
       name: t.track.name,
       duration_ms: t.track.duration_ms,
-      artist: t.track.artists.map((a) => a.name),
-      album: t.track.album.name,
-      image: t.track.album.images[0].url,
-      album_url: t.track.album.href,
-      external_url: t.track.external_urls.spotify,
-      popularity: t.track.popularity,
-      disk_number: t.track.disc_number,
-      track_number: t.track.track_number,
-      release_date: t.track.album.release_date,
-      type: t.track.type
-    };
-  });
-
-  // const selectionselect({
-  //   message: "🎶 Select a song 🎶",
-  //   choices: choices
-  // })
-  const getAllTracks = await confirm({
-    message: "Do you want to download all tracks?",
-    default: false
-  });
-
-  if (getAllTracks) {
-    console.log("Downloading all tracks...");
-    selectedTracks = choices;
-  } else {
-    console.log("Downloading selected track...");
-    const selectedTracks = await checkbox({
-      message: "🎶 Select your songs 🎶",
-      choices: choices,
-      validate: (ans) => {
-        if (ans.length === 0) {
-          return "You must select at least one song to download.";
-        }
-        return true;
-      }
+          name: t.track.name,
+      duration_ms: t.track.duration_ms,
+          artist: t.track.artists.map((a) => a.name),
+          album: t.track.album.name,
+          duration_ms: t.track.duration_ms,
+          image: t.track.album.images?.[0]?.url || "",
+          album_url: t.track.album.href,
+          external_url: t.track.external_urls.spotify,
+          popularity: t.track.popularity,
+          disk_number: t.track.disc_number,
+          track_number: t.track.track_number,
+          release_date: t.track.album.release_date,
+          type: t.track.type,
+        },
+      };
     });
+  
+    if (choices.length === 0) {
+      throw new Error("No valid tracks found to process.");
+    }
+
+    const getAllTracks = await confirm({
+      message: "Do you want to download all tracks? This may take a while 🤔",
+      default: false,
+    });
+
+    let selectedTracks = [];
+    if (getAllTracks) {
+      console.log("Downloading all tracks...");
+      selectedTracks = choices.map((c) => c.value);
+    } else {
+      console.log("Downloading selected track...");
+      selectedTracks = await checkbox({
+        message: "🎶 Select your songs 🎶",
+        choices: choices,
+        validate: (ans) => {
+          if (ans.length === 0) {
+            return "You must select at least one song to download.";
+          }
+          return true;
+        },
+      });
+    }
+    
+    selectedTracks.forEach((t) => {
+      if (!t.artist || t.artist.length === 0) {
+        console.warn(`Skipping track: ${t.name} due to missing artist information.`);
+        return;
+      }
+      searchAndDownloadYTTrack(t.artist[0], t.name, "./downloads", 1);
+    });
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
   }
-  selectedTracks.map((t) => {
-    searchAndDownloadYTTrack(t.artist[0], t.name, "./downloads", 1);
-  });
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -316,6 +332,24 @@ const cliMode = async (url) => {
     urlMode === null
   ) {
     if (token === null) {
+    const socket = io("http://localhost:3000/login", {autoConnect: true});
+      socket.on("connect", () => {
+        console.log("Using the socket thingy");
+      });
+
+      socket.c
+
+      // socket.on("message", async (authorizationCode) => {
+      //   console.log("Authorization code received");
+      //   token = authorizationCode;
+      //   socket.disconnect();
+      //   const playlist = await navigateSpotify(token);
+      //   console.log(
+      //     `🎵 ${playlist.name} contains ${playlist.tracks.total} tracks! 🎶`
+      //   );
+      //   navigateSpotifyTracks(token, playlist.id);
+      // });
+
       const server = fork(serverPath);
       console.log("Server stardddted");
       console.log(token);
@@ -325,6 +359,7 @@ const cliMode = async (url) => {
         console.log(
           "Server started\nlog in to your spotify account on http://localhost:3000/login"
         );
+        open('http://localhost:3000/login');
       });
 
       server.on("message", async (authorizationCode) => {
