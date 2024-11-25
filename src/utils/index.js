@@ -1,6 +1,5 @@
 import axios from "axios";
 import validUrl from "valid-url";
-import { SingleBar, Presets } from "cli-progress";
 import { exec } from "child_process";
 
 const sanitizeFileName = (name) => {
@@ -141,58 +140,17 @@ const searchAndDownloadYTTrack = async (artist, title, outputDir, resultsCount =
   // {"downloaded_bytes": 4111336, "total_bytes": 4111336, "filename": "./downloads/Voyage - Dynamic.webm", "status": "finished", "elapsed": 0.9414091110229492, "ctx_id": null, "speed": 4367215.0097767385, "_speed_str": "4.16MiB/s", "_total_bytes_str": "   3.92MiB", "_elapsed_str": "00:00:00", "_percent_str": "100.0%", "_default_template": "100% of    3.92MiB in 00:00:00 at 4.16MiB/s"} 
   const downloadQuery = `-x --audio-format mp3 -o "${outputDir}/%(title)s.%(ext)s" --quiet --progress --progress-template "%(progress._percent_str)s - %(progress._total_bytes_str)s ETA %(progress._eta_str)s"`;
 
-
-  // const progressBar = new SingleBar(
-  //   {
-  //     format: "Downloading |{bar}| {percentage}% || {total}MiB"
-  //   },
-  //   Presets.shades_classic
-  // );
   const command = `yt-dlp ${downloadQuery} ${searchQuery}`;
 
   let total = 100;
   const process = exec(command);
   process.stdio[1].on("data", (data) => {
     console.log(data.toString());
-    
-    // let matchTotal = data.toString()
-    // matchTotal = matchTotal.replace(/\[download\]\s+/, "");
-    // console.log(matchTotal);
-    
-    // const matchTotal = data.toString().match(/(\d+\.\d+MiB)/);
-    // if (matchTotal) {
-    //   total = parseFloat(matchTotal[1].replace("MiB", ""));
-
-    //   if (!progressBar.isActive) {
-    //     progressBar.start(total, 0);
-    //   }
-    // }
-
-    // const match = data.toString().match(/(\d+\.\d+%)/);    
-    // if (match) {
-    //   let downloaded = (parseFloat(match[1].replace("%", "")) / 100) * total;
-    //   if (total === downloaded) {
-    //     progressBar.stop();
-    //     console.log("Download completed successfully!");
-    //     downloaded = 0;
-    //   } else {
-    //     progressBar.update(downloaded);
-    //   }
-    // }
   });
 
   process.on("message", (message) => {
     console.log("------------------------------------------")
   })
-
-  // process.on("close", (code) => {
-  //   if (code === 0) {
-  //     progressBar.stop();
-  //   } else {
-  //     progressBar.stop();
-  //     console.error(`Download failed with code ${code}`);
-  //   }
-  // });
 };
 
 const fetchPlaylistTracks = async (accessToken, playlistId) => {

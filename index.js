@@ -32,8 +32,6 @@ import {
   Presets
 } from "cli-progress";
 import fs from "fs";
-
-import open from "open";
 import puppeteer from "puppeteer";
 
 
