@@ -1,5 +1,9 @@
 # Spotituby
 
+![GitHub package.json version](https://img.shields.io/github/package-json/v/FrenzyExists/spotituby?style=flat-square)
+![npm](https://img.shields.io/npm/dt/spotituby?style=flat-square)
+
+
 **Spotituby** is a Node.js-based application that simplifies downloading music from Spotify playlists and YouTube. Designed for command-line enthusiasts, it provides a clean interface to download tracks and playlists in MP3 format.
 
 ## Features
