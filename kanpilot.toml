@@ -1,4 +1,4 @@
-name = "project"
+name = "music downloader PM"
 skipFolders = [ "node_modules", ".vscode", "out", "dist", ".vscode-test" ]
 skipFiles = [ ".gitignore", "package.json" ]
 
@@ -10,7 +10,7 @@ name = "To Do"
   id = "gsx1xsxt4ri5etnhdi9hz4a7"
   title = "Get All playlists using server"
   description = "Get playlists from the user"
-  tag = "backlog"
+  tag = "backend"
   linkFiles = [ ]
   dueDate = ""
   checkList = [ ]
@@ -32,7 +32,7 @@ name = "To Do"
   id = "llv5r9dmvk8pz34ekwnfsup1"
   title = "Implement basic user info"
   description = "<p></p>"
-  tag = "backlog"
+  tag = "backend"
   linkFiles = [ ]
   dueDate = ""
   checkList = [ ]
@@ -43,6 +43,39 @@ name = "To Do"
   id = "j3872mf9gwyifyk09wyyj84z"
   title = "Remove progressbar, use default"
   description = ""
+  tag = "cli"
+  linkFiles = [ ]
+  dueDate = ""
+  checkList = [ ]
+  priority = "Low"
+  linkCommits = [ ]
+
+  [[processes.tasks]]
+  id = "lvpws0ingpg1i6akfsp3x69h"
+  title = "Modify mp3 metadata with spotify data"
+  description = ""
+  tag = "cli"
+  linkFiles = [ ]
+  dueDate = ""
+  checkList = [ ]
+  priority = "High"
+  linkCommits = [ ]
+
+  [[processes.tasks]]
+  id = "f1e2rk58q4vbhkazq95o5b69"
+  title = "find a way to load streaming from the spotify API"
+  description = "<p></p>"
+  tag = "backlog"
+  linkFiles = [ ]
+  dueDate = ""
+  checkList = [ ]
+  priority = "Low"
+  linkCommits = [ ]
+
+  [[processes.tasks]]
+  id = "thkjnadh8qoxuhzcekbfol5q"
+  title = "implement a jester"
+  description = "I have no idea what to test lmao"
   tag = "backlog"
   linkFiles = [ ]
   dueDate = ""

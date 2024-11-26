@@ -6,6 +6,7 @@ MANPAGE_DIR="/usr/local/share/man/man1"
 APP_NAME="Spotituby"
 NPM_PACKAGE="spotituby"
 PYTHON_ENV=".venv"
+PYTHON_PKGS="requirements.txt"
 
 
 # Check if the script is run as root. If not, exit with a message
@@ -89,7 +90,7 @@ install_app() {
 
     # Install yt-dlp in the virtual environment
     echo "Installing Python dependencies..."
-    pip install yt-dlp==2024.11.4
+    pip install -r "${PYTHON_PKGS}"
 
     # Install the Node.js package globally
     echo "Installing Node.js dependencies..."
