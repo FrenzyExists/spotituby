@@ -1,7 +1,8 @@
 import {
   select,
   checkbox,
-  input
+  input,
+  search
 } from "@inquirer/prompts";
 import {
   identifyUrlType,
@@ -40,151 +41,73 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 // Now you can use __dirname as before
 const serverPath = resolve(__dirname, "src", "server.js");
 
-const downloadWithYtDlp = (url, outputDir, yt_type) => {
-  const getCommand = `yt-dlp --flat-playlist "${url}" --dump-json "${url}"`;
+const getYTPlaylist = async (url, outputDir) => {
+  const getCommand = `yt-dlp --flat-playlist --dump-json "${url}"`;
 
-  if (yt_type === "yt-playlist") {
-    console.log("Downloading playlist...");
+  const c = new Promise((resolve, reject) => {
+    const process = exec(getCommand);
 
-    console.log(getCommand);
-    let b;
-    exec(getCommand, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`Error during download: ${error.message}`);
-        return;
-      }
+    process.on("error", (error) => {
+      console.error(`Error during execution: ${error.message}`);
+      reject(error); // Reject the promise if an error occurs
+    });
+
+    let choices = [];
+    process.stdout.on("data", (data) => {
       try {
-        const playlistVideos = stdout
+        // Parse and accumulate JSON lines
+        const parsedData = data
           .trim()
           .split("\n")
           .map((line) => JSON.parse(line));
-
-        const choices = playlistVideos
-          .map((v) => ({
-            name: v.title,
-            value: v.url
-          }))
-          .concat([{
-            name: "All videos",
-            value: null
-          }]);
-
-        checkbox({
-          message: `Found ${playlistVideos.length} videos in the playlist.\nSelect a song to download`,
-          choices: choices,
-          validate: (ans) => {
-            if (ans.length === 0) {
-              return "You must select at least one song to download.";
-            }
-            return true;
-          }
-        }).then((ans) => {
-          if (ans === null) {
-            // TODO: Remove the progressbar and use the yt-dlp progress bar
-            const progressBar = new SingleBar({
-                format: "Downloading |{bar}| {percentage}% || {total}MiB"
-              },
-              Presets.shades_classic
-            );
-
-            playlistVideos.map((v) => {
-              const process = exec(
-                `yt-dlp ${v.url} -x --audio-format mp3 -o "${outputDir}/%(title)s.%(ext)s"`
-              );
-            });
-            //////////////////////// Finish this later
-            // TODO: Remove progressbar, use default kanpilotID(j3872mf9gwyifyk09wyyj84z)
-          } else {
-            const progressBar = new SingleBar({
-                format: "Downloading |{bar}| {percentage}% || {total}MiB"
-              },
-              Presets.shades_classic
-            );
-
-            const process = exec(
-              `yt-dlp ${ans} -x --audio-format mp3 -o "${outputDir}/%(title)s.%(ext)s"`
-            );
-
-            let total = 100;
-            process.stdio[1].on("data", (data) => {
-              const matchTotal = data.toString().match(/(\d+\.\d+MiB)/);
-              if (matchTotal) {
-                total = parseFloat(matchTotal[1].replace("MiB", ""));
-
-                if (!progressBar.isActive) {
-                  progressBar.start(total, 0);
-                }
-              }
-
-              const match = data.toString().match(/(\d+\.\d+%)/);
-              if (match) {
-                const downloaded =
-                  (parseFloat(match[1].replace("%", "")) / 100) * total;
-
-                progressBar.update(downloaded);
-              }
-            });
-
-            process.on("close", (code) => {
-              if (code === 0) {
-                progressBar.stop();
-                console.log("Download completed successfully!");
-              } else {
-                progressBar.stop();
-                console.error(`Download failed with code ${code}`);
-              }
-            });
-          }
-        });
+        choices.push(...parsedData); // Add parsed data to choices array
       } catch (error) {
-        console.error(`Error parsing JSON: ${error.message}`);
-        return;
-      }
-    });
-  } else if (yt_type === "yt-track") {
-    console.log("Downloading track...");
-    // const progressBar = new SingleBar({
-    //     format: "Downloading |{bar}| {percentage}% || {total}MiB"
-    //   },
-    //   Presets.shades_classic
-    // );
-
-    const process = exec(
-      `yt-dlp ${url} -x --audio-format mp3 -o "${outputDir}/%(title)s.%(ext)s"`
-    );
-
-    let total = 100;
-    process.stdio[1].on("data", (data) => {
-      const matchTotal = data.toString().match(/(\d+\.\d+MiB)/);
-      if (matchTotal) {
-        total = parseFloat(matchTotal[1].replace("MiB", ""));
-
-        // if (!progressBar.isActive) {
-        //   progressBar.start(total, 0);
-        // }
-      }
-
-      const match = data.toString().match(/(\d+\.\d+%)/);
-      if (match) {
-        const downloaded =
-          (parseFloat(match[1].replace("%", "")) / 100) * total;
-
-        progressBar.update(downloaded);
+        console.error(`Error parsing data: ${error.message}`);
+        reject(error); // Reject the promise if parsing fails
       }
     });
 
     process.on("close", (code) => {
       if (code === 0) {
-        progressBar.stop();
-        console.log("Download completed successfully!");
+        // console.log(choices); // debug
+        
+        // Ensure choices is always an array and map to required format
+        resolve(
+          choices.map((v) => ({
+            // might need to add more params 
+            name: v.title, // Display name for selection
+            value: v.url,  // Actual value to be used
+          }))
+        );
       } else {
-        progressBar.stop();
-        console.error(`Download failed with code ${code}`);
+        reject(new Error(`Process exited with code ${code}`));
       }
     });
-  } else {
-    console.log("Unknown type");
-    return;
+  });
+
+  try {
+    const playlist = await c;
+    
+    await trackSelector(playlist).then((selectedTracks) =>{
+      selectedTracks.map((t) => {
+        searchAndDownloadYTTrack({
+          url: t.url,
+          search: false,
+          outputDir,
+        });
+      })
+    });
+  } catch (error) {
+    console.error("Error during JSON extraction:", error);
+  }
+};
+
+
+const downloadWithYtDlp = (url, outputDir, yt_type) => {
+  if (yt_type === "yt-playlist") {
+    getYTPlaylist(url, outputDir);
+  } else if (yt_type === "yt-track") {
+    searchAndDownloadYTTrack(url=url, search=false, outputDir=outputDir);
   }
 };
 
@@ -258,7 +181,7 @@ const navigateSpotifyTracks = async (token, playlistId) => {
         console.warn(`Skipping track: ${t.name} due to missing artist information.`);
         return;
       }
-      searchAndDownloadYTTrack(t.artist[0], t.name, "./downloads", 1);
+      searchAndDownloadYTTrack(artist=t.artist[0], title=t.name, outputDir="./downloads", 1);
     }))
   } catch (error) {
     console.error(`Error: ${error.message}`);

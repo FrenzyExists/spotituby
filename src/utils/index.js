@@ -139,14 +139,14 @@ const fetchPlaylists = async (accessToken) => {
   }
 };
 
-const searchAndDownloadYTTrack = async (artist, title, outputDir, resultsCount = 1) => {
-  const searchQuery = `ytsearch${resultsCount}:"${artist} - ${title}"`;
+const searchAndDownloadYTTrack = async (artist=null, title=null, outputDir=null, resultsCount = 1, search=true, url=null) => {
+  const searchQuery = search && !url ? `ytsearch${resultsCount}:"${artist} - ${title}"` : `ytsearch${resultsCount}:"${artist} - ${title}"`;
+  const urlQuery = url && !search ? `url:${url}` : "";
   // {"downloaded_bytes": 4111336, "total_bytes": 4111336, "filename": "./downloads/Voyage - Dynamic.webm", "status": "finished", "elapsed": 0.9414091110229492, "ctx_id": null, "speed": 4367215.0097767385, "_speed_str": "4.16MiB/s", "_total_bytes_str": "   3.92MiB", "_elapsed_str": "00:00:00", "_percent_str": "100.0%", "_default_template": "100% of    3.92MiB in 00:00:00 at 4.16MiB/s"} 
   const downloadQuery = `-x --audio-format mp3 -o "${outputDir}/%(title)s.%(ext)s" --quiet --progress --progress-template "%(progress._percent_str)s - %(progress._total_bytes_str)s ETA %(progress._eta_str)s"`;
 
-  const command = `yt-dlp ${downloadQuery} ${searchQuery}`;
+  const command = `yt-dlp ${urlQuery} ${downloadQuery} ${searchQuery}`;
 
-  let total = 100;
   const process = exec(command);
   process.stdio[1].on("data", (data) => {
     console.log(data.toString());
@@ -192,7 +192,7 @@ const trackSelector = async (choices) => {
   } else {
     console.log("Downloading selected track...");
     selectedTracks = await checkbox({
-      message: "🎶 Select your songs 🎶",
+      message: `Found ${choices.length} tracks in this playlisy.\n🎶 Select your songs 🎶`,
       choices: choices,
       validate: (ans) => {
         if (ans.length === 0) {
