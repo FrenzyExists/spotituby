@@ -1,6 +1,5 @@
 import {
   select,
-  confirm,
   checkbox,
   input
 } from "@inquirer/prompts";
@@ -10,6 +9,7 @@ import {
   fetchPlaylists,
   fetchPlaylistTracks,
   searchAndDownloadYTTrack,
+  trackSelector,
   TOKENFILE
 } from "./src/utils/index.js";
 import {
@@ -143,11 +143,11 @@ const downloadWithYtDlp = (url, outputDir, yt_type) => {
     });
   } else if (yt_type === "yt-track") {
     console.log("Downloading track...");
-    const progressBar = new SingleBar({
-        format: "Downloading |{bar}| {percentage}% || {total}MiB"
-      },
-      Presets.shades_classic
-    );
+    // const progressBar = new SingleBar({
+    //     format: "Downloading |{bar}| {percentage}% || {total}MiB"
+    //   },
+    //   Presets.shades_classic
+    // );
 
     const process = exec(
       `yt-dlp ${url} -x --audio-format mp3 -o "${outputDir}/%(title)s.%(ext)s"`
@@ -159,9 +159,9 @@ const downloadWithYtDlp = (url, outputDir, yt_type) => {
       if (matchTotal) {
         total = parseFloat(matchTotal[1].replace("MiB", ""));
 
-        if (!progressBar.isActive) {
-          progressBar.start(total, 0);
-        }
+        // if (!progressBar.isActive) {
+        //   progressBar.start(total, 0);
+        // }
       }
 
       const match = data.toString().match(/(\d+\.\d+%)/);
@@ -219,6 +219,7 @@ const navigateSpotify = async (token) => {
   return selectPlaylist;
 };
 
+
 const navigateSpotifyTracks = async (token, playlistId) => {
   try {
     const tracks = await fetchPlaylistTracks(token, playlistId);
@@ -252,44 +253,17 @@ const navigateSpotifyTracks = async (token, playlistId) => {
         };
       });
 
-    if (choices.length === 0) {
-      throw new Error("No valid tracks found to process.");
-    }
-
-    const getAllTracks = await confirm({
-      message: "Do you want to download all tracks? This may take a while 🤔",
-      default: false,
-    });
-
-    let selectedTracks = [];
-    if (getAllTracks) {
-      console.log("Downloading all tracks...");
-      selectedTracks = choices.map((c) => c.value);
-    } else {
-      console.log("Downloading selected track...");
-      selectedTracks = await checkbox({
-        message: "🎶 Select your songs 🎶",
-        choices: choices,
-        validate: (ans) => {
-          if (ans.length === 0) {
-            return "You must select at least one song to download.";
-          }
-          return true;
-        },
-      });
-    }
-
-    selectedTracks.forEach((t) => {
+    trackSelector(choices).then(async (selectedTracks) => selectedTracks.map((t) => {
       if (!t.artist || t.artist.length === 0) {
         console.warn(`Skipping track: ${t.name} due to missing artist information.`);
         return;
       }
       searchAndDownloadYTTrack(t.artist[0], t.name, "./downloads", 1);
-    });
+    }))
   } catch (error) {
     console.error(`Error: ${error.message}`);
   }
-};
+}
 
 /////////////////////////////////////////////////////////////////////////////
 const serverMode = (url) => {
@@ -348,7 +322,7 @@ async function loginToSpotify() {
   // });
 
   const username = await input({
-    message: "Enter your username:",
+    message: "Enter your username or email:",
   });
   const password = await input({
     message: "Enter your password:",

@@ -1,6 +1,10 @@
 import axios from "axios";
 import validUrl from "valid-url";
 import { exec } from "child_process";
+import {
+  confirm,
+  checkbox,
+} from "@inquirer/prompts";
 
 const sanitizeFileName = (name) => {
   return name.replace(/[<>:"/\\|?*]+/g, "");
@@ -170,6 +174,40 @@ const fetchPlaylistTracks = async (accessToken, playlistId) => {
   }
 };
 
+const trackSelector = async (choices) => {
+
+  if (choices.length === 0) {
+    throw new Error("No valid tracks found to process.");
+  }
+
+  const getAllTracks = await confirm({
+    message: "Do you want to download all tracks? This may take a while 🤔",
+    default: false,
+  });
+
+  let selectedTracks = [];
+  if (getAllTracks) {
+    console.log("Downloading all tracks...");
+    selectedTracks = await choices.map((c) => c.value);
+  } else {
+    console.log("Downloading selected track...");
+    selectedTracks = await checkbox({
+      message: "🎶 Select your songs 🎶",
+      choices: choices,
+      validate: (ans) => {
+        if (ans.length === 0) {
+          return "You must select at least one song to download.";
+        }
+        return true;
+      },
+    });
+  }  
+  return selectedTracks;
+}
+
+
+
+
 const TOKENFILE = ".token";
 export {
   TOKENFILE,
@@ -179,5 +217,6 @@ export {
   sanitizeFileName,
   identifyUrlType,
   getClientAccessToken,
-  fetchMe
+  fetchMe,
+  trackSelector
 };
