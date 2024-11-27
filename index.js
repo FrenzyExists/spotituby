@@ -67,6 +67,14 @@ const getYTPlaylist = async (url, outputDir) => {
       }
     });
 
+    process.on("SIGTERM", () => {
+      process.kill();
+    });
+
+    process.on("SIGINT", () => {
+      process.kill();
+    });
+
     process.on("close", (code) => {
       if (code === 0) {
         // console.log(choices); // debug
@@ -138,6 +146,9 @@ const navigateSpotify = async (token) => {
   let selectPlaylist = await select({
     message: "Select a playlist",
     choices: choices
+  }).catch(e => {
+    console.log("Selection Cancelled. Goodbye 👋");
+    process.exit(0);
   });
   return selectPlaylist;
 };
@@ -181,7 +192,9 @@ const navigateSpotifyTracks = async (token, playlistId) => {
         console.warn(`Skipping track: ${t.name} due to missing artist information.`);
         return;
       }
-      searchAndDownloadYTTrack(artist=t.artist[0], title=t.name, outputDir="./downloads", 1);
+      console.log(t.artist);
+      
+      searchAndDownloadYTTrack(t.artist[0], t.name, "./downloads", 1);
     }))
   } catch (error) {
     console.error(`Error: ${error.message}`);

@@ -139,6 +139,16 @@ const fetchPlaylists = async (accessToken) => {
   }
 };
 
+/**
+ * Searches for a YouTube track based on artist and title, and downloads it in MP3 format.
+ *
+ * @param {string|null} artist - The artist's name. Used in search query if provided.
+ * @param {string|null} title - The track title. Used in search query if provided.
+ * @param {string|null} outputDir - The directory where the downloaded file will be saved.
+ * @param {number} resultsCount - The number of search results to consider. Defaults to 1.
+ * @param {boolean} search - Flag to determine if a search should be performed. Defaults to true.
+ * @param {string|null} url - Direct URL of the track, bypassing search if provided.
+ */
 const searchAndDownloadYTTrack = async (artist=null, title=null, outputDir=null, resultsCount = 1, search=true, url=null) => {
   const searchQuery = search && !url ? `ytsearch${resultsCount}:"${artist} - ${title}"` : `ytsearch${resultsCount}:"${artist} - ${title}"`;
   const urlQuery = url && !search ? `url:${url}` : "";
@@ -155,6 +165,12 @@ const searchAndDownloadYTTrack = async (artist=null, title=null, outputDir=null,
   process.on("message", (message) => {
     console.log("------------------------------------------")
   })
+
+  process.on("SIGINT", () => {
+    console.log("SIGINT received, closing...");
+    process.kill();
+  });
+
 };
 
 const fetchPlaylistTracks = async (accessToken, playlistId) => {
@@ -181,8 +197,11 @@ const trackSelector = async (choices) => {
   }
 
   const getAllTracks = await confirm({
-    message: "Do you want to download all tracks? This may take a while 🤔",
+    message: `Found ${choices.length} tracks in this playlist.\nDo you want to download all tracks? This may take a while 🤔`,
     default: false,
+  }).catch( e => {
+    console.log("Option Cancelled. Goodbye 👋");
+    process.exit(0);
   });
 
   let selectedTracks = [];
@@ -192,7 +211,7 @@ const trackSelector = async (choices) => {
   } else {
     console.log("Downloading selected track...");
     selectedTracks = await checkbox({
-      message: `Found ${choices.length} tracks in this playlisy.\n🎶 Select your songs 🎶`,
+      message: `🎶 Select your songs 🎶`,
       choices: choices,
       validate: (ans) => {
         if (ans.length === 0) {
@@ -200,12 +219,13 @@ const trackSelector = async (choices) => {
         }
         return true;
       },
+    }).catch(e => {
+      console.log("Selection Cancelled. Goodbye 👋");
+      process.exit(0);
     });
   }  
   return selectedTracks;
 }
-
-
 
 
 const TOKENFILE = ".token";
