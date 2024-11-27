@@ -34,9 +34,11 @@ import {
 } from "cli-progress";
 import fs from "fs";
 import puppeteer from "puppeteer";
-
+import os from "os";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const HOME = os.homedir();
 
 // Now you can use __dirname as before
 const serverPath = resolve(__dirname, "src", "server.js");
@@ -154,7 +156,7 @@ const navigateSpotify = async (token) => {
 };
 
 
-const navigateSpotifyTracks = async (token, playlistId) => {
+const navigateSpotifyTracks = async (token, playlistId, download_path) => {
   try {
     const tracks = await fetchPlaylistTracks(token, playlistId);
 
@@ -194,7 +196,7 @@ const navigateSpotifyTracks = async (token, playlistId) => {
       }
       console.log(t.artist);
       
-      searchAndDownloadYTTrack(t.artist[0], t.name, "./downloads", 1);
+      searchAndDownloadYTTrack(t.artist[0], t.name, download_path, 1);
     }))
   } catch (error) {
     console.error(`Error: ${error.message}`);
@@ -238,7 +240,7 @@ const serverMode = (url) => {
 
 async function loginToSpotify() {
   let browser = await puppeteer.launch({
-    headless: true
+    headless: false
   });
   const page = await browser.newPage();
 
@@ -294,7 +296,7 @@ async function loginToSpotify() {
       return false;
     } else {
       console.log('Login successful!');
-      browser.close();
+      // browser.close();
       return true;
     }
   } catch (error) {
@@ -305,7 +307,8 @@ async function loginToSpotify() {
 }
 
 
-const cliMode = async (url) => {
+const cliMode = async (url, download_path=`${HOME}/Music`) => {
+  
   const urlMode = identifyUrlType(url);
   let token = null;
 
@@ -321,7 +324,7 @@ const cliMode = async (url) => {
   }
 
   if (urlMode === "yt-playlist" || urlMode === "yt-track") {
-    downloadWithYtDlp(url, "./downloads", urlMode);
+    downloadWithYtDlp(url, download_path, urlMode);
   } else if (
     urlMode === "sy-playlist" ||
     urlMode === "sy-track" ||
@@ -352,7 +355,7 @@ const cliMode = async (url) => {
         // Save token to file
         fs.writeFileSync(TOKENFILE, token);
         const playlist = await navigateSpotify(token);
-        navigateSpotifyTracks(token, playlist.id);
+        navigateSpotifyTracks(token, playlist.id, download_path);
 
         server.kill();
       });
@@ -362,7 +365,7 @@ const cliMode = async (url) => {
       console.log(
         `🎵 ${playlist.name} contains ${playlist.tracks.total} tracks! 🎶`
       );
-      navigateSpotifyTracks(token, playlist.id);
+      navigateSpotifyTracks(token, playlist.id, download_path);
     }
   } else {
     console.log("Invalid URL provided.");
@@ -400,6 +403,7 @@ const main = () => {
       "after",
       `
     Examples:
+    spotituby --mode cli
     spotituby --mode cli --url https://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI
     spotituby --mode cli --url https://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji
     spotituby --mode server --url https://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI
@@ -411,9 +415,10 @@ const main = () => {
 
   const mode = program.opts().mode;
   const url = program.opts().url;
+  const download_path = program.opts().path
 
   if (mode === "cli") {
-    cliMode(url);
+    cliMode(url, download_path);
   } else if (mode === "server") {
     serverMode(url);
   } else {

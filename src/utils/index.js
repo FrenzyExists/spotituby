@@ -163,13 +163,18 @@ const searchAndDownloadYTTrack = async (artist=null, title=null, outputDir=null,
   });
 
   process.on("message", (message) => {
-    console.log("------------------------------------------")
+    
   })
 
   process.on("SIGINT", () => {
     console.log("SIGINT received, closing...");
     process.kill();
   });
+
+  process.on("exit", () => {
+    console.log("------------------------------------------")
+    console.log(`Saved at ${outputDir}`)
+  })
 
 };
 
@@ -227,6 +232,10 @@ const trackSelector = async (choices) => {
   return selectedTracks;
 }
 
+
+const writeMetadata =  (info, outputDir, ) => {
+  console.log("Havent implemented this sry 😂");
+}
 
 const TOKENFILE = ".token";
 export {

@@ -40,15 +40,19 @@ name = "To Do"
   linkCommits = [ ]
 
   [[processes.tasks]]
-  id = "j3872mf9gwyifyk09wyyj84z"
-  title = "Remove progressbar, use default"
-  description = ""
-  tag = "cli"
+  id = "f1e2rk58q4vbhkazq95o5b69"
+  title = "find a way to load streaming from the spotify API"
+  description = "<p></p>"
+  tag = "backlog"
   linkFiles = [ ]
   dueDate = ""
   checkList = [ ]
   priority = "Low"
   linkCommits = [ ]
+
+[[processes]]
+id = "process2"
+name = "In Progress"
 
   [[processes.tasks]]
   id = "lvpws0ingpg1i6akfsp3x69h"
@@ -62,14 +66,17 @@ name = "To Do"
   linkCommits = [ ]
 
   [[processes.tasks]]
-  id = "f1e2rk58q4vbhkazq95o5b69"
-  title = "find a way to load streaming from the spotify API"
-  description = "<p></p>"
-  tag = "backlog"
+  id = "wvxa5wvg9tf5szf9sgwhuiys"
+  title = "Allow Spotituby plz"
+  description = """
+<button data-testid="auth-accept" data-encore-id="buttonPrimary" class="Button-sc-qlcn5g-0 hVnPpH"><span class="ButtonInner-sc-14ud5tc-0 dOeYIb encore-bright-accent-set"><p data-encore-id="type" class="Type__TypeElement-sc-goli3j-0 bkjCej">Agree</p></span><span class="ButtonFocus-sc-2hq6ey-0 iMcXKe"></span></button>
+
+Tell puppeteer to look at this button and do something about it"""
+  tag = "bug"
   linkFiles = [ ]
   dueDate = ""
   checkList = [ ]
-  priority = "Low"
+  priority = "High"
   linkCommits = [ ]
 
   [[processes.tasks]]
@@ -82,11 +89,6 @@ name = "To Do"
   checkList = [ ]
   priority = ""
   linkCommits = [ ]
-
-[[processes]]
-id = "process2"
-name = "In Progress"
-tasks = [ ]
 
 [[processes]]
 id = "process3"
@@ -123,4 +125,15 @@ name = "Done"
   dueDate = ""
   checkList = [ ]
   priority = ""
+  linkCommits = [ ]
+
+  [[processes.tasks]]
+  id = "j3872mf9gwyifyk09wyyj84z"
+  title = "Remove progressbar, use default"
+  description = ""
+  tag = "cli"
+  linkFiles = [ ]
+  dueDate = ""
+  checkList = [ ]
+  priority = "Low"
   linkCommits = [ ]
