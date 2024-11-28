@@ -5,7 +5,7 @@ import { client_id, redirectUri, secret } from "./utils/dotenv.js";
 class SpotitubeController {}
 
 SpotitubeController.postMyCredentialsLogin = (req, res) => {
-  const scope = "playlist-read-private user-read-private user-read-email";
+  const scope = "playlist-read-private user-read-private user-read-email playlist-read-collaborative user-top-read user-library-read user-follow-read";
 
   const authUrl = `https://accounts.spotify.com/authorize?${querystring.stringify(
     {

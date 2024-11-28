@@ -5,6 +5,7 @@ import {
   confirm,
   checkbox,
 } from "@inquirer/prompts";
+import NodeID3 from "node-id3";
 
 const sanitizeFileName = (name) => {
   return name.replace(/[<>:"/\\|?*]+/g, "");
@@ -139,6 +140,24 @@ const fetchPlaylists = async (accessToken) => {
   }
 };
 
+const fetchAlbums = async (accessToken) => {
+  try {
+    const playlists = await axios.get(
+      "https://api.spotify.com/v1/me/albums",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      }
+    );
+    const d = playlists.data;
+    return d;
+  } catch (error) {
+    throw error;
+  }
+};
+
+
 /**
  * Searches for a YouTube track based on artist and title, and downloads it in MP3 format.
  *
@@ -252,6 +271,7 @@ const writeMetadata =  (info, outputDir, ) => {
 const TOKENFILE = ".token";
 export {
   TOKENFILE,
+  fetchAlbums,
   searchAndDownloadYTTrack,
   fetchPlaylistTracks,
   fetchPlaylists,

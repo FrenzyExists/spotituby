@@ -28,10 +28,6 @@ import {
   fork,
   spawn
 } from "child_process";
-import {
-  SingleBar,
-  Presets
-} from "cli-progress";
 import fs from "fs";
 import puppeteer from "puppeteer";
 import os from "os";
@@ -128,24 +124,27 @@ const navigateSpotify = async (token) => {
   }
 
   const user = await fetchMe(token);
-  console.log(user);
+  // console.log(user); // debugging stuff
   
   console.log(`welcome ${user.display_name}`);
 
   const playlists = await fetchPlaylists(token);
   let p = playlists.items;
-
+  
   let choices = [];
+  let n = 1
   p.map((pl) => {
-    choices.push({
-      name: pl.name,
-      value: {
-        id: pl.id,
-        name: pl.name,
-        tracks: pl.tracks
-      },
-      description: pl.description
-    });
+    if(pl) { // getting null values for some reason
+      choices.push({
+        name: pl.name === "" ? `unnamed track #${n++}` : pl?.name,
+        value: {
+          id: pl?.id,
+          name: pl?.name,
+          tracks: pl?.tracks
+        },
+        description: pl?.description
+      });
+    }
   });
   let selectPlaylist = await select({
     message: "Select a playlist",
@@ -196,7 +195,6 @@ const navigateSpotifyTracks = async (token, playlistId, download_path) => {
         console.warn(`Skipping track: ${t.name} due to missing artist information.`);
         return;
       }
-      console.log(t.artist);
       
       searchAndDownloadYTTrack(t.artist[0], t.name, download_path, 1);
     }))
