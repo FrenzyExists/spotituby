@@ -61,7 +61,9 @@ Ensure the following dependencies are installed:
    ```
 
 3. Run the installation script to set up the environment and application dependencies:
+
    ```bash
+   chmod 777 ./install.sh
    sudo ./install.sh
    ```
 

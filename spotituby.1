@@ -1,0 +1,59 @@
+#!/usr/bin/groff -Tascii
+
+.\" Manpage for spotituby
+.\" Original manpage by Detective Pikachu
+.\" Please adjust and add information as necessary.
+.TH SPOTITUBY 1 "August 2024" "1.0" "User Commands"
+.SH NAME
+spotituby \- Download music from Spotify and Youtube playlists or tracks
+.SH SYNOPSIS
+.B spotituby
+[\fIOPTION\fR]...
+.SH DESCRIPTION
+.B spotituby
+is a command-line tool for downloading music from Spotify playlists.
+
+Subsequent runs or advanced users can utilize various options to specify playlists, filter content, and set download directories.
+.SH OPTIONS
+.TP
+.BI \--mode
+Specifies what the mode this operates. There are two modes: 
+
+.B \--mode\ cli - CLI mode runs the program like a normal command-line tool.
+
+Options for CLI mode:
+
+.TP
+\fBspotituby --mode cli\fR
+Runs the interactive wizard, connecting to your Spotify account. It loads the user’s playlists, allowing you to download all songs or select specific tracks from a playlist.
+
+.TP
+\fBspotituby --mode cli --url\fR
+Runs the wizard but retrieves songs based on a provided URL. Supported URLs include:
+
+- Playlists (entire playlist or specific songs):
+  \fIhttps://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji\fR
+  \fIhttps://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI\fR
+
+- Songs (single URL only):
+  \fIhttps://www.youtube.com/watch?v=mFWVUBgXVDA\fR
+  \fIhttps://open.spotify.com/track/2qSkIjg1o9h3YT9RAgYN75?si=ed861f014f28453d\fR
+
+.TP
+\fBspotituby --mode cli --path\fR \fI<directory_path>\fR
+Runs the wizard but saves downloaded songs to the specified directory instead of the default \fI$HOME/Music\fR.
+
+.TP
+\fBspotituby --mode server\fR
+(Not yet implemented) Intended to run a local backend API on a specified port. CLI mode has priority for development. If server mode is critical for your needs, please provide feedback.
+
+.SH NOTES
+Ensure that you have valid Spotify credentials and access rights for the playlists you wish to download.
+
+The first time you run spotituby without parameters, it will prompt you for your Spotify credentials and guide you through selecting a playlist and download options.
+.SH AUTHOR
+Developed by Detective Pikachu.
+.SH REPORTING BUGS
+Report bugs to frenzyexists@gmail.com.
+.SH SEE ALSO
+spotify(1), curl(1), wget(1)
