@@ -128,6 +128,8 @@ const navigateSpotify = async (token) => {
   }
 
   const user = await fetchMe(token);
+  console.log(user);
+  
   console.log(`welcome ${user.display_name}`);
 
   const playlists = await fetchPlaylists(token);
@@ -240,7 +242,7 @@ const serverMode = (url) => {
 
 async function loginToSpotify() {
   let browser = await puppeteer.launch({
-    headless: false
+    headless: true
   });
   const page = await browser.newPage();
 
@@ -285,9 +287,24 @@ async function loginToSpotify() {
   console.log("Logging in...");
 
   try {
+    console.log("Authorizing app to spotify account...");
+    // Wait for navigation
+    await page.waitForNavigation();
+  
+    // Wait for the selector
+    await page.waitForSelector('.Button-sc-qlcn5g-0.hVnPpH', {
+      timeout: 5000,
+    });
+    // Click the button
+    await page.click('.Button-sc-qlcn5g-0.hVnPpH');
+  } catch (e) {
+    console.log("App is already authorized.");
+  }
+
+  try {
     const errorMessage = await page.waitForSelector('.sc-gLXSEc.eZHyFP', {
       visible: true,
-      timeout: 5000
+      timeout: 2000
     }).catch(() => null);
 
     if (errorMessage) {
@@ -296,7 +313,7 @@ async function loginToSpotify() {
       return false;
     } else {
       console.log('Login successful!');
-      // browser.close();
+      browser.close();
       return true;
     }
   } catch (error) {

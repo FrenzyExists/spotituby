@@ -15,7 +15,8 @@ SpotitubeController.postMyCredentialsLogin = (req, res) => {
       redirect_uri: redirectUri,
     }
   )}`;
-  console.log(`\n--------------------------------------\nRedirecting to:\n${authUrl}\n--------------------------------------`);
+  // uncomment this for debug
+  // console.log(`\n--------------------------------------\nRedirecting to:\n${authUrl}\n--------------------------------------`);
 
   res.redirect(authUrl);
 };
@@ -42,7 +43,8 @@ SpotitubeController.postMyCredentialsCallback = async (req, res) => {
 
       const accessToken = tokenResponse.data.access_token;
       const refreshToken = tokenResponse.data.refresh_token;
-      console.log(`\n--------------------------------------\naccess token:\naccessToken\n--------------------------------------`);
+      // uncomment this for debug
+      // console.log(`\n--------------------------------------\naccess token:\naccessToken\n--------------------------------------`);
 
       const expiresTokenTime = tokenResponse.data.expires_in;
       process.send?.(accessToken);

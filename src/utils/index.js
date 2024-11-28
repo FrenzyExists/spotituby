@@ -42,7 +42,7 @@ const identifyUrlType = (url) => {
     }
 
     if (hostname === "youtu.be") {
-      return "yt-track"; // Shortened YouTube video link
+      return "yt-track"; // YouTube video link
     }
 
     // Spotify URLs
@@ -106,11 +106,11 @@ const fetchMe = async (accessToken) => {
     });
     return me.data;
   } catch (error) {
-    console.log(
-      "Can't reach you ",
-      error.response?.status,
-      error.response?.dat
-    );
+    // console.log(
+    //   "Can't reach you ",
+    //   error.response?.status,
+    //   error.response?.dat
+    // );    
     // throw error;
     return null;
   }
@@ -195,6 +195,18 @@ const fetchPlaylistTracks = async (accessToken, playlistId) => {
   }
 };
 
+
+/**
+ * Presents user with a checkbox prompt to select tracks from a playlist.
+ *
+ * If user selects to download all tracks, it will return an array of all track
+ * objects. If user selects specific tracks, it will return an array of the
+ * selected track objects.
+ *
+ * @param {array} choices - An array of track objects to be selected from. Each
+ * track object should have a `name` and a `value` property.
+ * @returns {array} An array of selected track objects.
+ */
 const trackSelector = async (choices) => {
 
   if (choices.length === 0) {
