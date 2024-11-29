@@ -11,7 +11,8 @@ import {
   fetchPlaylistTracks,
   searchAndDownloadYTTrack,
   trackSelector,
-  TOKENFILE
+  TOKENFILE,
+  fetchLikedTracks
 } from "./src/utils/index.js";
 import {
   Command
@@ -131,6 +132,17 @@ const navigateSpotify = async (token) => {
   const playlists = await fetchPlaylists(token);
   let p = playlists.items;
   
+  const liked = await fetchLikedTracks(token)
+  // let l = liked.items.map(tr => tr.track)
+  
+
+  p.push({
+    name: "Liked Songs",
+    id: 'liked-songs',
+    tracks: liked,
+    description: "All your liked songs in one single playlist"
+  })
+
   let choices = [];
   let n = 1
   p.map((pl) => {
@@ -157,15 +169,21 @@ const navigateSpotify = async (token) => {
 };
 
 
-const navigateSpotifyTracks = async (token, playlistId, download_path) => {
+const navigateSpotifyTracks = async (token, playlistId, download_path, track_size) => {
   try {
-    const tracks = await fetchPlaylistTracks(token, playlistId);
-
-    if (!tracks || !tracks.items) {
+    // console.log(playlistId);
+    let tracks = null
+    if (playlistId !== 'liked-songs') {;
+       tracks = await fetchPlaylistTracks(token, playlistId, track_size);
+    } else {
+       tracks = await fetchLikedTracks(token, track_size);
+    }
+    
+    if (!tracks) {
       throw new Error("No tracks found in the playlist.");
     }
 
-    const choices = tracks.items
+    const choices = tracks
       .map((t) => {
         return {
           name: `${t.track.name} - ${t.track.artists.map((a) => a.name).join(", ")}`, // Visible to user
@@ -245,19 +263,6 @@ async function loginToSpotify() {
   const page = await browser.newPage();
 
   await page.goto('http://localhost:3000/login');
-  // page.on('response', async (response) => {
-  //     const url = response.url();
-  //     if (url.includes('/callback')) { // This is the callback URL
-  //         const responseBody = await response.json(); // Assuming the token is returned as JSON
-  //         if (responseBody && responseBody.token) {
-  //             console.log('Token received:', responseBody.token);
-  //             // You can save the token to a file or process it here
-  //             await browser.close(); // Close the browser if token is found
-  //         } else {
-  //             console.log('No token found in callback response');
-  //         }
-  //     }
-  // });
 
   const username = await input({
     message: "Enter your username or email:",
@@ -370,7 +375,7 @@ const cliMode = async (url, download_path=`${HOME}/Music`) => {
         // Save token to file
         fs.writeFileSync(TOKENFILE, token);
         const playlist = await navigateSpotify(token);
-        navigateSpotifyTracks(token, playlist.id, download_path);
+        navigateSpotifyTracks(token, playlist.id, download_path, playlist.tracks.total);
 
         server.kill();
       });
@@ -380,7 +385,7 @@ const cliMode = async (url, download_path=`${HOME}/Music`) => {
       console.log(
         `🎵 ${playlist.name} contains ${playlist.tracks.total} tracks! 🎶`
       );
-      navigateSpotifyTracks(token, playlist.id, download_path);
+      navigateSpotifyTracks(token, playlist.id, download_path, playlist.tracks.total);
     }
   } else {
     console.log("Invalid URL provided.");
