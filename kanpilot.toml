@@ -18,17 +18,6 @@ name = "To Do"
   linkCommits = [ ]
 
   [[processes.tasks]]
-  id = "v1lpyqddavsj7twc1m5swhnc"
-  title = "Get a public playlist"
-  description = "Returns a public playlist given a spotify playlist url"
-  tag = "backlog"
-  linkFiles = [ ]
-  dueDate = ""
-  checkList = [ ]
-  priority = ""
-  linkCommits = [ ]
-
-  [[processes.tasks]]
   id = "llv5r9dmvk8pz34ekwnfsup1"
   title = "Implement basic user info"
   description = "<p></p>"
@@ -55,31 +44,20 @@ id = "process2"
 name = "In Progress"
 
   [[processes.tasks]]
-  id = "lvpws0ingpg1i6akfsp3x69h"
-  title = "Modify mp3 metadata with spotify data"
-  description = ""
-  tag = "cli"
-  linkFiles = [ ]
-  dueDate = ""
-  checkList = [ ]
-  priority = "High"
-  linkCommits = [ ]
-
-  [[processes.tasks]]
-  id = "wvxa5wvg9tf5szf9sgwhuiys"
-  title = "Allow Spotituby plz"
-  description = '<p>Agree</p><p> Tell puppeteer to look at this button and do something about it</p><p></p><p>Use this</p><p></p><p>&lt;button data-testid="auth-accept" data-encore-id="buttonPrimary" class="Button-sc-qlcn5g-0 hVnPpH"&gt;&lt;span class="ButtonInner-sc-14ud5tc-0 dOeYIb encore-bright-accent-set"&gt;&lt;p data-encore-id="type" class="Type__TypeElement-sc-goli3j-0 bkjCej"&gt;Agree&lt;/p&gt;&lt;/span&gt;&lt;span class="ButtonFocus-sc-2hq6ey-0 iMcXKe"&gt;&lt;/span&gt;&lt;/button&gt;</p>'
-  tag = "bug"
-  linkFiles = [ ]
-  dueDate = ""
-  checkList = [ ]
-  priority = "High"
-  linkCommits = [ ]
-
-  [[processes.tasks]]
   id = "thkjnadh8qoxuhzcekbfol5q"
   title = "implement a jester"
   description = "I have no idea what to test lmao"
+  tag = "backlog"
+  linkFiles = [ ]
+  dueDate = ""
+  checkList = [ ]
+  priority = ""
+  linkCommits = [ ]
+
+  [[processes.tasks]]
+  id = "v1lpyqddavsj7twc1m5swhnc"
+  title = "Get a public playlist"
+  description = "Returns a public playlist given a spotify playlist url"
   tag = "backlog"
   linkFiles = [ ]
   dueDate = ""
@@ -133,4 +111,26 @@ name = "Done"
   dueDate = ""
   checkList = [ ]
   priority = "Low"
+  linkCommits = [ ]
+
+  [[processes.tasks]]
+  id = "wvxa5wvg9tf5szf9sgwhuiys"
+  title = "Allow Spotituby plz"
+  description = '<p>Agree</p><p> Tell puppeteer to look at this button and do something about it</p><p></p><p>Use this</p><p></p><p>&lt;button data-testid="auth-accept" data-encore-id="buttonPrimary" class="Button-sc-qlcn5g-0 hVnPpH"&gt;&lt;span class="ButtonInner-sc-14ud5tc-0 dOeYIb encore-bright-accent-set"&gt;&lt;p data-encore-id="type" class="Type__TypeElement-sc-goli3j-0 bkjCej"&gt;Agree&lt;/p&gt;&lt;/span&gt;&lt;span class="ButtonFocus-sc-2hq6ey-0 iMcXKe"&gt;&lt;/span&gt;&lt;/button&gt;</p>'
+  tag = "bug"
+  linkFiles = [ ]
+  dueDate = ""
+  checkList = [ ]
+  priority = "High"
+  linkCommits = [ ]
+
+  [[processes.tasks]]
+  id = "lvpws0ingpg1i6akfsp3x69h"
+  title = "Modify mp3 metadata with spotify data"
+  description = ""
+  tag = "cli"
+  linkFiles = [ ]
+  dueDate = ""
+  checkList = [ ]
+  priority = "High"
   linkCommits = [ ]

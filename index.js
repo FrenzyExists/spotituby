@@ -182,20 +182,17 @@ const navigateSpotifyTracks = async (token, playlistId, download_path, track_siz
     if (!tracks) {
       throw new Error("No tracks found in the playlist.");
     }
-
+  
     const choices = tracks
       .map((t) => {
+        
         return {
           name: `${t.track.name} - ${t.track.artists.map((a) => a.name).join(", ")}`, // Visible to user
           value: {
             name: t.track.name,
-            name: t.track.name,
-            duration_ms: t.track.duration_ms,
-            name: t.track.name,
             duration_ms: t.track.duration_ms,
             artist: t.track.artists.map((a) => a.name),
             album: t.track.album.name,
-            duration_ms: t.track.duration_ms,
             image: t.track.album.images?.[0]?.url || "",
             album_url: t.track.album.href,
             external_url: t.track.external_urls.spotify,
@@ -204,6 +201,8 @@ const navigateSpotifyTracks = async (token, playlistId, download_path, track_siz
             track_number: t.track.track_number,
             release_date: t.track.album.release_date,
             type: t.track.type,
+            explicit: t.track.explicit,
+            isrc: t.track.external_ids.isrc
           },
         };
       });
@@ -214,7 +213,7 @@ const navigateSpotifyTracks = async (token, playlistId, download_path, track_siz
         return;
       }
       
-      searchAndDownloadYTTrack(t.artist[0], t.name, download_path, 1);
+      searchAndDownloadYTTrack(t, download_path, 1);
     }))
   } catch (error) {
     console.error(`Error: ${error.message}`);
