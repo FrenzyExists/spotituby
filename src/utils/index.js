@@ -108,15 +108,23 @@ const fetchMe = async accessToken => {
     });
     return me.data;
   } catch (error) {
-    // console.log(
-    //   "Can't reach you ",
-    //   error.response?.status,
-    //   error.response?.dat
-    // );
-    // throw error;
     return null;
   }
 };
+
+
+const fetchTrack = async (accessToken, track_name, track_artist) => {
+  try {
+    const me = await axios.get(`https://api.spotify.com/v1/search?q=${track_name}+${track_artist}&type=track&limit=1`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    });
+    return me.data;
+  } catch (error) {
+    return null;
+  }
+}
 
 /**
  * Fetches the user's playlists from the Spotify API using the given access token.
@@ -124,24 +132,33 @@ const fetchMe = async accessToken => {
  * @param {string} accessToken The Spotify access token to use for the request
  * @returns {Promise<SpotifyApi.PlaylistObject[]>} The user's playlists
  */
-const fetchPlaylists = async (accessToken, page_size = 50) => {
+const fetchPlaylists = async (accessToken, page_size = -1) => {
+  let playlists = [];
+  let nextUrl = `https://api.spotify.com/v1/me/playlists?limit=${page_size === -1 ? 50 : page_size}`; // Default limit is 50 for fetching all
+
   try {
-    const playlists = await axios.get(
-      `https://api.spotify.com/v1/me/playlists?limit=${page_size}`,
-      {
+    while (nextUrl) {
+      const response = await axios.get(nextUrl, {
         headers: {
-          Authorization: `Bearer ${accessToken}`
-        }
-      }
-    );
-    // TODO: FIX THE SELECTOR FUNCTIONS TO USE THIS
-    // const d = sanitizeArrays(playlists.data.items); // use this one later
-    const d = playlists.data;
-    return d;
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      // Add the current page's playlists to the list
+      playlists = playlists.concat(response.data.items);
+
+      // If page_size is -1, continue fetching until there are no more pages
+      nextUrl = page_size === -1 ? response.data.next : null;
+    }
+    
+    playlists = playlists.filter(playlist => playlist !== null);    
+    return playlists;
   } catch (error) {
+    console.error("Error fetching playlists:", error.message);
     throw error;
   }
 };
+
 
 const fetchAlbums = async accessToken => {
   try {
@@ -157,15 +174,14 @@ const fetchAlbums = async accessToken => {
   }
 };
 
-const fetchLikedTracks = async (accessToken, pageSize = 50) => {
+const fetchLikedTracks = async (accessToken, pageSize = -1) => {
   try {
-    const maxPageSize = 50; // Spotify API limit per request
+    const maxPageSize = 50;
     let totalTracks = [];
     let offset = 0;
 
-    // Paginate if pageSize exceeds 50
-    while (offset < pageSize) {
-      const limit = Math.min(maxPageSize, pageSize - offset); // Fetch only the required amount
+    while (true) {
+      const limit = pageSize === -1 ? maxPageSize : Math.min(maxPageSize, pageSize - offset);
       const response = await axios.get("https://api.spotify.com/v1/me/tracks", {
         headers: {
           Authorization: `Bearer ${accessToken}`
@@ -176,15 +192,17 @@ const fetchLikedTracks = async (accessToken, pageSize = 50) => {
         }
       });
 
+      // Add the current batch of tracks to the total list
       totalTracks = totalTracks.concat(response.data.items);
+
+      // Update the offset for the next batch
       offset += limit;
 
-      // Stop if there are no more tracks
-      if (!response.data.next) {
+      // If there are no more tracks or we've fetched the required number, break
+      if (!response.data.next || (pageSize !== -1 && offset >= pageSize)) {
         break;
       }
     }
-
     return totalTracks;
   } catch (error) {
     console.error("Error fetching liked tracks:", error.message);
@@ -227,57 +245,86 @@ const getFilenameFromCommand = (metadataCommand, outputDir) => {
  * @param {boolean} search - Flag to determine if a search should be performed. Defaults to true.
  * @param {string|null} url - Direct URL of the track, bypassing search if provided.
  */
-const searchAndDownloadYTTrack = async (
+const searchAndDownloadYTTrack = async ({
   metadata = null,
   outputDir = null,
-  resultsCount = 1,
+  resultsCount = 5,
   search = true,
-  url = null
-) => {
-  
-  const filterQuery =  
-    search && !url 
-      ? `--reject-title "official video|music video"`
-      : "";
-  const searchQuery =
-    search && !url
-      ? `ytsearch${resultsCount}:"${metadata.artist} - ${metadata.name}"`
-      : "";
-  
-  const urlQuery = url && !search ? `url:${url}` : "";
+  url = null,
+}) => {
+  // Function to execute a shell command and return the result as a promise
+  const executeCommand = (command) => {
+    return new Promise((resolve, reject) => {
+      const process = exec(command, (error, stdout, stderr) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(stdout.trim());
+        }
+      });
+    });
+  };
 
-  const downloadQuery = `-x --audio-format mp3 -o "${outputDir}/%(title)s.%(ext)s" --quiet --progress --progress-template "%(progress._percent_str)s - %(progress._total_bytes_str)s ETA %(progress._eta_str)s"`;
+  if (!metadata) {
+    
+  }
 
-  const command = `yt-dlp ${urlQuery} ${downloadQuery} ${searchQuery} ${filterQuery}`;
+  try {
+    // Determine the URL to download from
+    if (!url && search && metadata) {
+      const searchQuery = `ytsearch${resultsCount}:\"${metadata.artist} - ${metadata.name}\"`;
+      const filterQuery = `--reject-title \"official video|music video\"`;
 
-  const metadataCommand = `yt-dlp ${urlQuery} ${searchQuery} ${filterQuery} --print "%(title)s.%(ext)s"`;
-  
-  const process = exec(command);
-  process.stdio[1].on("data", data => {
-    console.log(data.toString());
-  });
+      const searchCommand = `yt-dlp ${searchQuery} ${filterQuery} --print \"%(webpage_url)s\" 2>/dev/null | head -n 1`;
+      console.log(`Executing search command: ${searchCommand}`);
 
-  process.on("message", message => {});
+      url = await executeCommand(searchCommand);
 
-  process.on("SIGINT", () => {
-    console.log("SIGINT received, closing...");
-    process.kill();
-  });
-
-  process.on("exit", async () => {
-    console.log("------------------------------------------");
-    console.log(`Saved at ${outputDir}`);
-  
-    try {
-      const filename = await getFilenameFromCommand(metadataCommand, outputDir);
-      console.log(`Title: ${filename}`);
-      
-      await writeMetadata(metadata, filename);
-      console.log("Metadata written successfully!");
-    } catch (error) {
-      console.error("Error getting filename or writing metadata:", error);
+      if (!url) {
+        throw new Error("No results found for the given metadata.");
+      }
     }
-  });
+
+    // Ensure URL is defined
+    if (!url) {
+      throw new Error("A valid URL or metadata for search is required.");
+    }
+    
+
+    let n = metadata?.name;
+    if (!n) {
+      n = "%(title)s"
+    }
+    // Download the track
+    const downloadQuery = `-x --audio-format mp3 -o \"${outputDir}/${n}.%(ext)s\" --quiet --progress --progress-template \"%(progress._percent_str)s - %(progress._total_bytes_str)s ETA %(progress._eta_str)s\"`;
+    const downloadCommand = `yt-dlp ${url} ${downloadQuery}`;
+
+    console.log(`Executing download command: ${downloadCommand}`);
+
+    await executeCommand(downloadCommand);
+
+    console.log("Download completed successfully.");
+
+    // Retrieve metadata for the downloaded file
+    const metadataCommand = `yt-dlp ${url} --print \"${n}.%(ext)s\"`;
+    console.log(`Retrieving metadata with command: ${metadataCommand}`);
+
+    const filename = await executeCommand(metadataCommand);
+
+    console.log(`Downloaded file: ${filename}`);
+
+    // Write metadata to the file
+    if (metadata) {
+      try {
+        await writeMetadata(metadata, `${outputDir}/${filename}`);
+        console.log("Metadata written successfully!");
+      } catch (error) {
+        console.error("Error writing metadata:", error);
+      }
+    }
+  } catch (error) {
+    console.error("Error in searchAndDownloadYTTrack:", error);
+  }
 };
 
 const fetchPlaylistTracks = async (accessToken, playlistId, pageSize = 50) => {
@@ -437,5 +484,6 @@ export {
   getClientAccessToken,
   fetchMe,
   fetchLikedTracks,
-  trackSelector
+  trackSelector,
+  fetchTrack
 };

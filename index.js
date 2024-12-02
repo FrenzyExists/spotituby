@@ -1,7 +1,10 @@
+#!/usr/bin/env node
+
 import {
   select,
   checkbox,
   input,
+  password,
   search
 } from "@inquirer/prompts";
 import {
@@ -32,6 +35,7 @@ import {
 import fs from "fs";
 import puppeteer from "puppeteer";
 import os from "os";
+import { deprecate } from "util";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -100,7 +104,7 @@ const getYTPlaylist = async (url, outputDir) => {
         searchAndDownloadYTTrack({
           url: t.url,
           search: false,
-          outputDir,
+          outputDir: outputDir,
         });
       })
     });
@@ -114,9 +118,10 @@ const downloadWithYtDlp = (url, outputDir, yt_type) => {
   if (yt_type === "yt-playlist") {
     getYTPlaylist(url, outputDir);
   } else if (yt_type === "yt-track") {
-    searchAndDownloadYTTrack(url=url, search=false, outputDir=outputDir);
+    searchAndDownloadYTTrack({ url, search: false, outputDir });
   }
 };
+
 
 const navigateSpotify = async (token) => {
   if (!token) {
@@ -125,18 +130,14 @@ const navigateSpotify = async (token) => {
   }
 
   const user = await fetchMe(token);
-  // console.log(user); // debugging stuff
-  
   console.log(`welcome ${user.display_name}`);
 
-  const playlists = await fetchPlaylists(token);
-  let p = playlists.items;
+  let playlists = await fetchPlaylists(token);
   
   const liked = await fetchLikedTracks(token)
   // let l = liked.items.map(tr => tr.track)
-  
 
-  p.push({
+  playlists.push({
     name: "Liked Songs",
     id: 'liked-songs',
     tracks: liked,
@@ -145,7 +146,7 @@ const navigateSpotify = async (token) => {
 
   let choices = [];
   let n = 1
-  p.map((pl) => {
+  playlists.map((pl) => {
     if(pl) { // getting null values for some reason
       choices.push({
         name: pl.name === "" ? `unnamed track #${n++}` : pl?.name,
@@ -213,14 +214,23 @@ const navigateSpotifyTracks = async (token, playlistId, download_path, track_siz
         return;
       }
       
-      searchAndDownloadYTTrack(t, download_path, 1);
+      searchAndDownloadYTTrack({metadata:t, outputDir:download_path, search: true});
     }))
   } catch (error) {
     console.error(`Error: ${error.message}`);
   }
 }
 
-/////////////////////////////////////////////////////////////////////////////
+
+/**
+ * @deprecated This function is deprecated and should never be used.
+ * It is intended to be removed in a future version.
+ * 
+ * Initiates a server in server mode.
+ * 
+ * @param {string} url - The URL to initiate the server with.
+ * @returns {void}
+ */
 const serverMode = (url) => {
   console.log("Initiating server...");
   const server = spawn("node", [serverPath]);
@@ -266,10 +276,16 @@ async function loginToSpotify() {
   const username = await input({
     message: "Enter your username or email:",
   });
-  const password = await input({
+  const password_field = await password({
     message: "Enter your password:",
-    type: "password",
-  });
+    mask: true,
+    validate: (input) => {
+      if (input.length < 6) {
+        return "Password must be at least 6 characters long";
+      }
+      return true;
+    }
+  })
 
   // Wait for the username and password fields to load
   await page.waitForSelector('#login-username', {
@@ -281,7 +297,7 @@ async function loginToSpotify() {
 
   // Fill in the login form and submit
   await page.type('#login-username', username);
-  await page.type('#login-password', password);
+  await page.type('#login-password', password_field);
 
   // Click the login button
   await page.click('#login-button');
@@ -381,10 +397,15 @@ const cliMode = async (url, download_path=`${HOME}/Music`) => {
     } else {
       console.log("Token found - skipping login");
       const playlist = await navigateSpotify(token);
+      
+      let total = playlist.tracks.total;
+      if (!playlist.tracks.total) {
+        total = playlist.tracks.length;
+      }
       console.log(
-        `🎵 ${playlist.name} contains ${playlist.tracks.total} tracks! 🎶`
+        `🎵 ${playlist.name} contains ${total} tracks! 🎶`
       );
-      navigateSpotifyTracks(token, playlist.id, download_path, playlist.tracks.total);
+      navigateSpotifyTracks(token, playlist.id, download_path, total);
     }
   } else {
     console.log("Invalid URL provided.");
@@ -413,7 +434,7 @@ const main = () => {
     .name("spotituby")
     .description("Download music from Spotify playlists")
     .version("1.0.0")
-    .option("--mode <mode>", "Mode to run the app in (server or cli)")
+    .option("--mode <mode>", "Mode to run the app in (cli)")
     .option(
       "--url <url>",
       "URL to process (YouTube or Spotify) playlist or track"
@@ -425,8 +446,6 @@ const main = () => {
     spotituby --mode cli
     spotituby --mode cli --url https://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI
     spotituby --mode cli --url https://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji
-    spotituby --mode server --url https://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI
-    spotituby --mode server --url https://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji
     `
     );
 
@@ -438,8 +457,8 @@ const main = () => {
 
   if (mode === "cli") {
     cliMode(url, download_path);
-  } else if (mode === "server") {
-    serverMode(url);
+  } else if (mode === "daemon") {
+     // TODO: implement daemon mode for v1.0.3
   } else {
     program.outputHelp();
   }

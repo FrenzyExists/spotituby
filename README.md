@@ -88,7 +88,7 @@ Ensure the following dependencies are installed:
 node index.js --mode cli --url <spotify-or-youtube-url>
 ```
 
-> NOTE: This app has two modes, cli and server. Server mode is still not fully implemented. Use cli only for now
+> NOTE: This app only has one mode, a new mode will be in development in the future so stay tuned! Use cli only for now
 
 ### 2. Examples
 

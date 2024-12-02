@@ -1,13 +1,10 @@
 {
   "name": "spotituby",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "app": "node index.js"
-  },
-  "publishConfig": {
-  "registry": "https://npm.pkg.github.com"
+    "app": "node ./index.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +15,9 @@
   "description": "Download music from Spotify and Youtube playlists or tracks",
   "devDependencies": {
     "jest": "^29.7.0"
+  },
+  "bin": {
+    "spotituby": "node ./index.js"
   },
   "keywords": [
     "music",

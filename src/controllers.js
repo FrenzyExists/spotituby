@@ -75,12 +75,4 @@ SpotitubeController.getMyPlaylist = (req, res) => {
   // each song contains names, urls of the song in spotify, album, artist, and other info
 };
 
-SpotitubeController.getPublicPlaylist = (req, res) => {};
-
-SpotitubeController.downloadPlaylist = (req, res) => {};
-
-SpotitubeController.whoAmI = (req, res) => {};
-
-SpotitubeController.deleteMyCredentials = (req, res) => {};
-
 export default SpotitubeController;
