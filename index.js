@@ -15,7 +15,8 @@ import {
   searchAndDownloadYTTrack,
   trackSelector,
   TOKENFILE,
-  fetchLikedTracks
+  fetchLikedTracks,
+  printHeader
 } from "./src/utils/index.js";
 import {
   Command
@@ -160,6 +161,7 @@ const navigateSpotify = async (token) => {
       });
     }
   });
+  console.clear()
   let selectPlaylist = await select({
     message: "Select a playlist",
     choices: choices
@@ -468,17 +470,13 @@ const cliMode = async (url, download_path=`${HOME}/Music`) => {
  * @returns {void}
  */
 const main = () => {
-  console.log(`
-  \x1b[34m====================================\x1b[0m
-  \x1b[34m  Spotituby: Revolutionizing Music  \x1b[0m
-  \x1b[34m  That One Downloader You Need.  \x1b[0m
-  \x1b[34m====================================\x1b[0m
-`);
+  console.clear()
+  printHeader();
 
   const program = new Command();
   program
-    .name("spotituby")
-    .description("Download music from Spotify playlists")
+    .name(`\x1b[34mspotituby\x1b[0m`)
+    .description(`\x1b[33mDownload music from Spotify playlists\x1b[0m`)
     .version("1.0.0")
     .option("--mode <mode>", "Mode to run the app in (cli)")
     .option(
@@ -493,10 +491,10 @@ const main = () => {
       "after",
       `
     Examples:
-    spotituby --mode cli
-    spotituby --mode cli --url https://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI
-    spotituby --mode cli --url https://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji
-    spotituby --reset    # Reset stored credentials
+    \x1b[34mspotituby \x1b[33m--mode \x1b[31mcli\x1b[0m
+    \x1b[34mspotituby \x1b[33m--mode \x1b[31mcli \x1b[33m--url \x1b[31mhttps://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI\x1b[0m
+    \x1b[34mspotituby \x1b[33m--mode \x1b[31mcli \x1b[33m--url \x1b[31mhttps://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji\x1b[0m
+    \x1b[34mspotituby \x1b[33m--reset\x1b[0m    # Reset stored credentials
     `
     );
 

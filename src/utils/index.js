@@ -3,6 +3,11 @@ import validUrl from "valid-url";
 import { exec } from "child_process";
 import { confirm, checkbox } from "@inquirer/prompts";
 import NodeID3 from "node-id3";
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, resolve } from 'path';
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const sanitizeFileName = name => {
   return name.replace(/[<>:"/\\|?*]+/g, "");
@@ -510,10 +515,39 @@ const writeMetadata = async (info, filepath) => {
   };
   
   let f = filepath.replace(/\.[^/.]+$/, ".mp3");
-  // console.log(f);
   
   NodeID3.update(tags, f, (e, buff) => {});
 };
+
+const printHeader = () => {
+  const packageJson = JSON.parse(
+    readFileSync(resolve(__dirname, '../../package.json'), 'utf8')
+  );
+  const VERSION = packageJson.version;
+
+  const terminalWidth = process.stdout.columns || 80;
+
+  const headerLines = [
+    "==========================================================",
+    "  Spotituby: Revolutionizing Music  ",
+    `  v${VERSION}  `,
+    "  Download your favorite music, anywhere, anytime  ",
+    "  Made with ❤️ by FrenzyExists  ",
+    "=========================================================="
+  ];
+    // Find the longest line to calculate padding
+    const maxLength = Math.max(...headerLines.map(line => line.length));
+  
+    // Print each line centered
+    const centeredHeader = headerLines
+      .map(line => {
+        const padding = Math.max(0, Math.floor((terminalWidth - line.length) / 2));
+        return " ".repeat(padding) + `\x1b[34m${line}\x1b[0m`;
+      })
+      .join("\n");
+  
+    console.log("\n" + centeredHeader + "\n");
+}
 
 const TOKENFILE = ".token";
 export {
@@ -530,5 +564,6 @@ export {
   fetchLikedTracks,
   trackSelector,
   fetchTrack,
-  getAuthToken
+  getAuthToken,
+  printHeader
 };
