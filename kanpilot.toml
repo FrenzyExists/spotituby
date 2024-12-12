@@ -7,28 +7,6 @@ id = "process1"
 name = "To Do"
 
   [[processes.tasks]]
-  id = "gsx1xsxt4ri5etnhdi9hz4a7"
-  title = "Get All playlists using server"
-  description = "Get playlists from the user"
-  tag = "backend"
-  linkFiles = [ ]
-  dueDate = ""
-  checkList = [ ]
-  priority = ""
-  linkCommits = [ ]
-
-  [[processes.tasks]]
-  id = "llv5r9dmvk8pz34ekwnfsup1"
-  title = "Implement basic user info"
-  description = "<p></p>"
-  tag = "backend"
-  linkFiles = [ ]
-  dueDate = ""
-  checkList = [ ]
-  priority = ""
-  linkCommits = [ ]
-
-  [[processes.tasks]]
   id = "f1e2rk58q4vbhkazq95o5b69"
   title = "find a way to load streaming from the spotify API"
   description = "<p></p>"
@@ -55,9 +33,12 @@ name = "In Progress"
   linkCommits = [ ]
 
   [[processes.tasks]]
-  id = "v1lpyqddavsj7twc1m5swhnc"
-  title = "Get a public playlist"
-  description = "Returns a public playlist given a spotify playlist url"
+  id = "vrjw8iu5em37n1ue9tac5yth"
+  title = "Fix login bug"
+  description = """
+TL;DR
+
+Seems I have to use an authorization token, which for my app i have not been using. This is important because other users that are not me won't be able to use the app, which kinda beats the purpose. """
   tag = "backlog"
   linkFiles = [ ]
   dueDate = ""
@@ -133,4 +114,41 @@ name = "Done"
   dueDate = ""
   checkList = [ ]
   priority = "High"
+  linkCommits = [ ]
+
+  [[processes.tasks]]
+  id = "v1lpyqddavsj7twc1m5swhnc"
+  title = "Get a public playlist"
+  description = "Returns a public playlist given a spotify playlist url"
+  tag = "backlog"
+  linkFiles = [ ]
+  dueDate = ""
+  checkList = [ ]
+  priority = ""
+  linkCommits = [ ]
+
+[[processes]]
+id = "da4ysp6vwjj8jcq7jr7e94a2"
+name = "Scrapped"
+
+  [[processes.tasks]]
+  id = "gsx1xsxt4ri5etnhdi9hz4a7"
+  title = "Get All playlists using server"
+  description = "Get playlists from the user"
+  tag = "backend"
+  linkFiles = [ ]
+  dueDate = ""
+  checkList = [ ]
+  priority = ""
+  linkCommits = [ ]
+
+  [[processes.tasks]]
+  id = "llv5r9dmvk8pz34ekwnfsup1"
+  title = "Implement basic user info"
+  description = "<p></p>"
+  tag = "backend"
+  linkFiles = [ ]
+  dueDate = ""
+  checkList = [ ]
+  priority = ""
   linkCommits = [ ]

@@ -5,7 +5,7 @@ import { client_id, redirectUri, secret } from "./utils/dotenv.js";
 class SpotitubeController {}
 
 SpotitubeController.postMyCredentialsLogin = (req, res) => {
-  const scope = "playlist-read-private user-read-private user-read-email playlist-read-collaborative user-top-read user-library-read user-follow-read";
+  const scope = "user-read-recently-played user-top-read user-read-playback-position user-read-playback-state user-modify-playback-state user-read-currently-playing user-library-modify user-library-read app-remote-control streaming playlist-read-private playlist-read-collaborative playlist-modify-public playlist-modify-private user-follow-read user-follow-modify ugc-image-upload user-read-email user-read-private";
 
   const authUrl = `https://accounts.spotify.com/authorize?${querystring.stringify(
     {
@@ -47,7 +47,8 @@ SpotitubeController.postMyCredentialsCallback = async (req, res) => {
       // console.log(`\n--------------------------------------\naccess token:\naccessToken\n--------------------------------------`);
 
       const expiresTokenTime = tokenResponse.data.expires_in;
-      process.send?.(accessToken);
+	    // console.log(accessToken);
+      process.send(accessToken);
 
       res.json({
         message: "Authorization successful!",

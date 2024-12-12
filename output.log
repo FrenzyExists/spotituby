@@ -1,0 +1,685 @@
+{ encodingTechnology: 'Lavf61.7.100', raw: { TSSE: 'Lavf61.7.100' } }
+https://accounts.spotify.com/authorize?response_type=code&client_id=50ae14efb82c434599448cfbbec0fee1&scope=playlist-read-private playlist-read-collaborative user-library-read&redirect_uri=http://localhost:3000/callback/
+null
+null
+{
+  collaborative: false,
+  description: 'Llegó el día que tanto esperabas: ¡que por fin te pudieras escapar del encierro! ¡Este playlist es pa&#x27; que salgas a la realidad y vaciles con tus panas las canciones más pega’s del momento!',
+  external_urls: {
+    spotify: 'https://open.spotify.com/playlist/4WlWq7dq0RR4cd1n65I3KY'
+  },
+  href: 'https://api.spotify.com/v1/playlists/4WlWq7dq0RR4cd1n65I3KY',
+  id: '4WlWq7dq0RR4cd1n65I3KY',
+  images: [
+    {
+      height: null,
+      url: 'https://image-cdn-ak.spotifycdn.com/image/ab67706c0000da84e7465941693eef476222bf32',
+      width: null
+    }
+  ],
+  name: 'Un Flow Atrevido',
+  owner: {
+    display_name: 'Doritos Puerto Rico',
+    external_urls: {
+      spotify: 'https://open.spotify.com/user/q855kpfipstoicaqfxr2k0vp4'
+    },
+    href: 'https://api.spotify.com/v1/users/q855kpfipstoicaqfxr2k0vp4',
+    id: 'q855kpfipstoicaqfxr2k0vp4',
+    type: 'user',
+    uri: 'spotify:user:q855kpfipstoicaqfxr2k0vp4'
+  },
+  primary_color: null,
+  public: true,
+  snapshot_id: 'AAAAMOZaF2zxwGhCwT2hfRzELMjL4JGv',
+  tracks: {
+    href: 'https://api.spotify.com/v1/playlists/4WlWq7dq0RR4cd1n65I3KY/tracks',
+    total: 21
+  },
+  type: 'playlist',
+  uri: 'spotify:playlist:4WlWq7dq0RR4cd1n65I3KY'
+}
+{
+  collaborative: false,
+  description: '',
+  external_urls: {
+    spotify: 'https://open.spotify.com/playlist/3PPbbsJhktmX5Cp6syx7gR'
+  },
+  href: 'https://api.spotify.com/v1/playlists/3PPbbsJhktmX5Cp6syx7gR',
+  id: '3PPbbsJhktmX5Cp6syx7gR',
+  images: [
+    {
+      height: null,
+      url: 'https://image-cdn-ak.spotifycdn.com/image/ab67706c0000d72cca9028430c0f7c3270eb005b',
+      width: null
+    }
+  ],
+  name: 'Synthwave/Vaporwave',
+  owner: {
+    display_name: 'dexter.antonsson',
+    external_urls: { spotify: 'https://open.spotify.com/user/dexter.antonsson' },
+    href: 'https://api.spotify.com/v1/users/dexter.antonsson',
+    id: 'dexter.antonsson',
+    type: 'user',
+    uri: 'spotify:user:dexter.antonsson'
+  },
+  primary_color: null,
+  public: true,
+  snapshot_id: 'AAABfOc/qreeFenQT9U4Xdzfzl1q6+Qh',
+  tracks: {
+    href: 'https://api.spotify.com/v1/playlists/3PPbbsJhktmX5Cp6syx7gR/tracks',
+    total: 291
+  },
+  type: 'playlist',
+  uri: 'spotify:playlist:3PPbbsJhktmX5Cp6syx7gR'
+}
+null
+{
+  collaborative: false,
+  description: 'If you see this music, let me tell you something: Please die :)',
+  external_urls: {
+    spotify: 'https://open.spotify.com/playlist/0JG1HsQaijJ5YukKLeGQU0'
+  },
+  href: 'https://api.spotify.com/v1/playlists/0JG1HsQaijJ5YukKLeGQU0',
+  id: '0JG1HsQaijJ5YukKLeGQU0',
+  images: [
+    {
+      height: 640,
+      url: 'https://mosaic.scdn.co/640/ab67616d00001e02a513bbde87358452986d81bbab67616d00001e02a7bf5f20c6344010c5abb410ab67616d00001e02c09ae45aa7c410ca6d194dedab67616d00001e02fec2691d20750b512ba92483',
+      width: 640
+    },
+    {
+      height: 300,
+      url: 'https://mosaic.scdn.co/300/ab67616d00001e02a513bbde87358452986d81bbab67616d00001e02a7bf5f20c6344010c5abb410ab67616d00001e02c09ae45aa7c410ca6d194dedab67616d00001e02fec2691d20750b512ba92483',
+      width: 300
+    },
+    {
+      height: 60,
+      url: 'https://mosaic.scdn.co/60/ab67616d00001e02a513bbde87358452986d81bbab67616d00001e02a7bf5f20c6344010c5abb410ab67616d00001e02c09ae45aa7c410ca6d194dedab67616d00001e02fec2691d20750b512ba92483',
+      width: 60
+    }
+  ],
+  name: "Frenzy's Clusterfuck No.1",
+  owner: {
+    display_name: 'Detective Pikachu',
+    external_urls: {
+      spotify: 'https://open.spotify.com/user/bo7wfo31fhmxv8nzpv4gkc368'
+    },
+    href: 'https://api.spotify.com/v1/users/bo7wfo31fhmxv8nzpv4gkc368',
+    id: 'bo7wfo31fhmxv8nzpv4gkc368',
+    type: 'user',
+    uri: 'spotify:user:bo7wfo31fhmxv8nzpv4gkc368'
+  },
+  primary_color: null,
+  public: true,
+  snapshot_id: 'AAAAavFZJVE+A8p6ljNTw9y0WS5CsAFc',
+  tracks: {
+    href: 'https://api.spotify.com/v1/playlists/0JG1HsQaijJ5YukKLeGQU0/tracks',
+    total: 96
+  },
+  type: 'playlist',
+  uri: 'spotify:playlist:0JG1HsQaijJ5YukKLeGQU0'
+}
+{
+  collaborative: false,
+  description: '',
+  external_urls: {
+    spotify: 'https://open.spotify.com/playlist/2aQ9dfVtUJlvfxaTKsPenb'
+  },
+  href: 'https://api.spotify.com/v1/playlists/2aQ9dfVtUJlvfxaTKsPenb',
+  id: '2aQ9dfVtUJlvfxaTKsPenb',
+  images: [
+    {
+      height: 640,
+      url: 'https://mosaic.scdn.co/640/ab67616d00001e02039ae3d5aa7049254e794115ab67616d00001e0262892cd7493a46100ed78debab67616d00001e029d0dfcfbc8b90be59c48d3caab67616d00001e02dc0f1e9220077944f11134a0',
+      width: 640
+    },
+    {
+      height: 300,
+      url: 'https://mosaic.scdn.co/300/ab67616d00001e02039ae3d5aa7049254e794115ab67616d00001e0262892cd7493a46100ed78debab67616d00001e029d0dfcfbc8b90be59c48d3caab67616d00001e02dc0f1e9220077944f11134a0',
+      width: 300
+    },
+    {
+      height: 60,
+      url: 'https://mosaic.scdn.co/60/ab67616d00001e02039ae3d5aa7049254e794115ab67616d00001e0262892cd7493a46100ed78debab67616d00001e029d0dfcfbc8b90be59c48d3caab67616d00001e02dc0f1e9220077944f11134a0',
+      width: 60
+    }
+  ],
+  name: '',
+  owner: {
+    display_name: 'Chill Station',
+    external_urls: {
+      spotify: 'https://open.spotify.com/user/jxgrydjj6hu5u7seuns0jut6w'
+    },
+    href: 'https://api.spotify.com/v1/users/jxgrydjj6hu5u7seuns0jut6w',
+    id: 'jxgrydjj6hu5u7seuns0jut6w',
+    type: 'user',
+    uri: 'spotify:user:jxgrydjj6hu5u7seuns0jut6w'
+  },
+  primary_color: null,
+  public: true,
+  snapshot_id: 'AAAW6norG2ZvIkcFXDc2uA2hYtcW6ET6',
+  tracks: {
+    href: 'https://api.spotify.com/v1/playlists/2aQ9dfVtUJlvfxaTKsPenb/tracks',
+    total: 2736
+  },
+  type: 'playlist',
+  uri: 'spotify:playlist:2aQ9dfVtUJlvfxaTKsPenb'
+}
+{
+  collaborative: false,
+  description: '',
+  external_urls: {
+    spotify: 'https://open.spotify.com/playlist/25TjAFkHa4A2N5wZ7mRaQ7'
+  },
+  href: 'https://api.spotify.com/v1/playlists/25TjAFkHa4A2N5wZ7mRaQ7',
+  id: '25TjAFkHa4A2N5wZ7mRaQ7',
+  images: [
+    {
+      height: null,
+      url: 'https://i.scdn.co/image/ab67616d00001e02d840a57eba646ae5bd942310',
+      width: null
+    }
+  ],
+  name: 'My Playlist #2',
+  owner: {
+    display_name: 'Detective Pikachu',
+    external_urls: {
+      spotify: 'https://open.spotify.com/user/bo7wfo31fhmxv8nzpv4gkc368'
+    },
+    href: 'https://api.spotify.com/v1/users/bo7wfo31fhmxv8nzpv4gkc368',
+    id: 'bo7wfo31fhmxv8nzpv4gkc368',
+    type: 'user',
+    uri: 'spotify:user:bo7wfo31fhmxv8nzpv4gkc368'
+  },
+  primary_color: null,
+  public: true,
+  snapshot_id: 'AAAABI2/bJIf4kq26vdgo7EUvB6hDGeH',
+  tracks: {
+    href: 'https://api.spotify.com/v1/playlists/25TjAFkHa4A2N5wZ7mRaQ7/tracks',
+    total: 3
+  },
+  type: 'playlist',
+  uri: 'spotify:playlist:25TjAFkHa4A2N5wZ7mRaQ7'
+}
+{
+  collaborative: false,
+  description: 'Give this to a person that hates metal, and by the end of this, they will be headbanging to bands like ERRA. (If they aren&#x27;t, they probably like it in secret but are too ashamed to admit to liking it) The goal of this is to convert somebody who thinks that beatmakers are music artists over to metal.',
+  external_urls: {
+    spotify: 'https://open.spotify.com/playlist/6AC7ATFItO9rPdSKLc4m1R'
+  },
+  href: 'https://api.spotify.com/v1/playlists/6AC7ATFItO9rPdSKLc4m1R',
+  id: '6AC7ATFItO9rPdSKLc4m1R',
+  images: [
+    {
+      height: 640,
+      url: 'https://mosaic.scdn.co/640/ab67616d00001e0217f7b63037246f4c30188531ab67616d00001e021ba68aa1fb9a40e72219dfccab67616d00001e02ad652baa537983547fd8dfaaab67616d00001e02d38982d754066143f855d6dc',
+      width: 640
+    },
+    {
+      height: 300,
+      url: 'https://mosaic.scdn.co/300/ab67616d00001e0217f7b63037246f4c30188531ab67616d00001e021ba68aa1fb9a40e72219dfccab67616d00001e02ad652baa537983547fd8dfaaab67616d00001e02d38982d754066143f855d6dc',
+      width: 300
+    },
+    {
+      height: 60,
+      url: 'https://mosaic.scdn.co/60/ab67616d00001e0217f7b63037246f4c30188531ab67616d00001e021ba68aa1fb9a40e72219dfccab67616d00001e02ad652baa537983547fd8dfaaab67616d00001e02d38982d754066143f855d6dc',
+      width: 60
+    }
+  ],
+  name: 'Metal Music Conversion Kit',
+  owner: {
+    display_name: 'Enigma of Noise',
+    external_urls: {
+      spotify: 'https://open.spotify.com/user/zv2nom38igodd7rnyyvdva9m3'
+    },
+    href: 'https://api.spotify.com/v1/users/zv2nom38igodd7rnyyvdva9m3',
+    id: 'zv2nom38igodd7rnyyvdva9m3',
+    type: 'user',
+    uri: 'spotify:user:zv2nom38igodd7rnyyvdva9m3'
+  },
+  primary_color: null,
+  public: true,
+  snapshot_id: 'AAAAIET/KgN47qaxHJoLy6Lo2xdkNCYf',
+  tracks: {
+    href: 'https://api.spotify.com/v1/playlists/6AC7ATFItO9rPdSKLc4m1R/tracks',
+    total: 13
+  },
+  type: 'playlist',
+  uri: 'spotify:playlist:6AC7ATFItO9rPdSKLc4m1R'
+}
+{
+  collaborative: false,
+  description: 'ミカヅキBIGWAVE Mikazuki Bigwave Kawaii Future Funk Albums &#x2F; Singles &#x2F; Songs &#x2F; mikazukibigwave',
+  external_urls: {
+    spotify: 'https://open.spotify.com/playlist/4J4lfXXqtScQ4yHoWLQZn0'
+  },
+  href: 'https://api.spotify.com/v1/playlists/4J4lfXXqtScQ4yHoWLQZn0',
+  id: '4J4lfXXqtScQ4yHoWLQZn0',
+  images: [
+    {
+      height: null,
+      url: 'https://image-cdn-ak.spotifycdn.com/image/ab67706c0000da847db047be14de581281f34596',
+      width: null
+    }
+  ],
+  name: 'ミカヅキBIGWAVE Future Funk Songs',
+  owner: {
+    display_name: 'MB',
+    external_urls: { spotify: 'https://open.spotify.com/user/mikazukibigwave' },
+    href: 'https://api.spotify.com/v1/users/mikazukibigwave',
+    id: 'mikazukibigwave',
+    type: 'user',
+    uri: 'spotify:user:mikazukibigwave'
+  },
+  primary_color: null,
+  public: true,
+  snapshot_id: 'AAAAKgoQhCvZwTbm9FcHnQ7AoOf8zvIx',
+  tracks: {
+    href: 'https://api.spotify.com/v1/playlists/4J4lfXXqtScQ4yHoWLQZn0/tracks',
+    total: 115
+  },
+  type: 'playlist',
+  uri: 'spotify:playlist:4J4lfXXqtScQ4yHoWLQZn0'
+}
+{
+  collaborative: false,
+  description: 'Rock for the cult',
+  external_urls: {
+    spotify: 'https://open.spotify.com/playlist/5xDPmLEHr2CksVhLg135Y8'
+  },
+  href: 'https://api.spotify.com/v1/playlists/5xDPmLEHr2CksVhLg135Y8',
+  id: '5xDPmLEHr2CksVhLg135Y8',
+  images: [
+    {
+      height: 640,
+      url: 'https://mosaic.scdn.co/640/ab67616d00001e0214f8df9fb9c2d3056a994390ab67616d00001e0256072fea6785a3ad2d24237cab67616d00001e0257383649d25ab30a0bb5dfa0ab67616d00001e02ba12c467b8cc7eb3be9e7d8b',
+      width: 640
+    },
+    {
+      height: 300,
+      url: 'https://mosaic.scdn.co/300/ab67616d00001e0214f8df9fb9c2d3056a994390ab67616d00001e0256072fea6785a3ad2d24237cab67616d00001e0257383649d25ab30a0bb5dfa0ab67616d00001e02ba12c467b8cc7eb3be9e7d8b',
+      width: 300
+    },
+    {
+      height: 60,
+      url: 'https://mosaic.scdn.co/60/ab67616d00001e0214f8df9fb9c2d3056a994390ab67616d00001e0256072fea6785a3ad2d24237cab67616d00001e0257383649d25ab30a0bb5dfa0ab67616d00001e02ba12c467b8cc7eb3be9e7d8b',
+      width: 60
+    }
+  ],
+  name: 'Rock Rock Rock Rock',
+  owner: {
+    display_name: 'Detective Pikachu',
+    external_urls: {
+      spotify: 'https://open.spotify.com/user/bo7wfo31fhmxv8nzpv4gkc368'
+    },
+    href: 'https://api.spotify.com/v1/users/bo7wfo31fhmxv8nzpv4gkc368',
+    id: 'bo7wfo31fhmxv8nzpv4gkc368',
+    type: 'user',
+    uri: 'spotify:user:bo7wfo31fhmxv8nzpv4gkc368'
+  },
+  primary_color: null,
+  public: true,
+  snapshot_id: 'AAAAEBa8ZBeelTcLeOEdAFO/IFGayBde',
+  tracks: {
+    href: 'https://api.spotify.com/v1/playlists/5xDPmLEHr2CksVhLg135Y8/tracks',
+    total: 14
+  },
+  type: 'playlist',
+  uri: 'spotify:playlist:5xDPmLEHr2CksVhLg135Y8'
+}
+{
+  added_at: '2022-06-27T12:53:25Z',
+  album: {
+    album_type: 'single',
+    total_tracks: 1,
+    available_markets: [
+      'AR', 'AU', 'AT', 'BO', 'BR', 'BG', 'CA', 'CL', 'CO', 'CR',
+      'CY', 'CZ', 'DK', 'DO', 'DE', 'EC', 'EE', 'SV', 'FI', 'FR',
+      'GR', 'GT', 'HN', 'HK', 'HU', 'IS', 'IE', 'IT', 'LV', 'LT',
+      'MY', 'MT', 'MX', 'NZ', 'NI', 'NO', 'PA', 'PY', 'PE', 'PH',
+      'PL', 'PT', 'SG', 'SK', 'ES', 'SE', 'CH', 'TW', 'TR', 'UY',
+      'US', 'GB', 'AD', 'LI', 'MC', 'ID', 'JP', 'TH', 'VN', 'RO',
+      'IL', 'ZA', 'SA', 'AE', 'BH', 'QA', 'OM', 'KW', 'EG', 'MA',
+      'DZ', 'TN', 'LB', 'JO', 'PS', 'IN', 'KZ', 'MD', 'UA', 'AL',
+      'BA', 'HR', 'ME', 'MK', 'RS', 'SI', 'KR', 'BD', 'PK', 'LK',
+      'GH', 'KE', 'NG', 'TZ', 'UG', 'AG', 'AM', 'BS', 'BB', 'BZ',
+      ... 81 more items
+    ],
+    external_urls: {
+      spotify: 'https://open.spotify.com/album/3488fiYQcGSfkKKpr3ttCD'
+    },
+    href: 'https://api.spotify.com/v1/albums/3488fiYQcGSfkKKpr3ttCD',
+    id: '3488fiYQcGSfkKKpr3ttCD',
+    images: [ [Object], [Object], [Object] ],
+    name: 'Cracker Island (feat. Thundercat)',
+    release_date: '2022-06-22',
+    release_date_precision: 'day',
+    type: 'album',
+    uri: 'spotify:album:3488fiYQcGSfkKKpr3ttCD',
+    artists: [ [Object], [Object] ],
+    tracks: {
+      href: 'https://api.spotify.com/v1/albums/3488fiYQcGSfkKKpr3ttCD/tracks?offset=0&limit=50',
+      limit: 50,
+      next: null,
+      offset: 0,
+      previous: null,
+      total: 1,
+      items: [Array]
+    },
+    copyrights: [ [Object], [Object] ],
+    external_ids: { upc: '5054197188619' },
+    genres: [],
+    label: 'Parlophone UK',
+    popularity: 53
+  }
+}
+{
+  added_at: '2022-02-09T13:02:12Z',
+  album: {
+    album_type: 'single',
+    total_tracks: 1,
+    available_markets: [
+      'AR', 'AU', 'AT', 'BE', 'BO', 'BR', 'BG', 'CA', 'CL', 'CO',
+      'CR', 'CY', 'CZ', 'DK', 'DO', 'DE', 'EC', 'EE', 'SV', 'FI',
+      'FR', 'GR', 'GT', 'HN', 'HK', 'HU', 'IS', 'IE', 'IT', 'LV',
+      'LT', 'LU', 'MY', 'MT', 'MX', 'NL', 'NZ', 'NI', 'NO', 'PA',
+      'PY', 'PE', 'PH', 'PL', 'PT', 'SG', 'SK', 'ES', 'SE', 'CH',
+      'TW', 'TR', 'UY', 'US', 'GB', 'AD', 'LI', 'MC', 'ID', 'JP',
+      'TH', 'VN', 'RO', 'IL', 'ZA', 'SA', 'AE', 'BH', 'QA', 'OM',
+      'KW', 'EG', 'MA', 'DZ', 'TN', 'LB', 'JO', 'PS', 'IN', 'BY',
+      'KZ', 'MD', 'UA', 'AL', 'BA', 'HR', 'ME', 'MK', 'RS', 'SI',
+      'KR', 'BD', 'PK', 'LK', 'GH', 'KE', 'NG', 'TZ', 'UG', 'AG',
+      ... 85 more items
+    ],
+    external_urls: {
+      spotify: 'https://open.spotify.com/album/1729mRnEz3BT2fCthd3Up1'
+    },
+    href: 'https://api.spotify.com/v1/albums/1729mRnEz3BT2fCthd3Up1',
+    id: '1729mRnEz3BT2fCthd3Up1',
+    images: [ [Object], [Object], [Object] ],
+    name: 'Life',
+    release_date: '2021-09-24',
+    release_date_precision: 'day',
+    type: 'album',
+    uri: 'spotify:album:1729mRnEz3BT2fCthd3Up1',
+    artists: [ [Object] ],
+    tracks: {
+      href: 'https://api.spotify.com/v1/albums/1729mRnEz3BT2fCthd3Up1/tracks?offset=0&limit=50',
+      limit: 50,
+      next: null,
+      offset: 0,
+      previous: null,
+      total: 1,
+      items: [Array]
+    },
+    copyrights: [ [Object], [Object] ],
+    external_ids: { upc: '196292321258' },
+    genres: [],
+    label: 'AP Global Music',
+    popularity: 5
+  }
+}
+{
+  added_at: '2021-08-16T13:18:17Z',
+  album: {
+    album_type: 'single',
+    total_tracks: 1,
+    available_markets: [
+      'AR', 'AU', 'AT', 'BE', 'BO', 'BR', 'BG', 'CA', 'CL', 'CO',
+      'CR', 'CY', 'CZ', 'DK', 'DO', 'DE', 'EC', 'EE', 'SV', 'FI',
+      'FR', 'GR', 'GT', 'HN', 'HK', 'HU', 'IS', 'IE', 'IT', 'LV',
+      'LT', 'LU', 'MY', 'MT', 'MX', 'NL', 'NZ', 'NI', 'NO', 'PA',
+      'PY', 'PE', 'PH', 'PL', 'PT', 'SG', 'SK', 'ES', 'SE', 'CH',
+      'TW', 'TR', 'UY', 'US', 'GB', 'AD', 'LI', 'MC', 'ID', 'JP',
+      'TH', 'VN', 'RO', 'IL', 'ZA', 'SA', 'AE', 'BH', 'QA', 'OM',
+      'KW', 'EG', 'MA', 'DZ', 'TN', 'LB', 'JO', 'PS', 'IN', 'BY',
+      'KZ', 'MD', 'UA', 'AL', 'BA', 'HR', 'ME', 'MK', 'RS', 'SI',
+      'KR', 'BD', 'PK', 'LK', 'GH', 'KE', 'NG', 'TZ', 'UG', 'AG',
+      ... 85 more items
+    ],
+    external_urls: {
+      spotify: 'https://open.spotify.com/album/0hbwAcjGBGP2gutKpQHA8d'
+    },
+    href: 'https://api.spotify.com/v1/albums/0hbwAcjGBGP2gutKpQHA8d',
+    id: '0hbwAcjGBGP2gutKpQHA8d',
+    images: [ [Object], [Object], [Object] ],
+    name: '2:50 Remix',
+    release_date: '2021-06-21',
+    release_date_precision: 'day',
+    type: 'album',
+    uri: 'spotify:album:0hbwAcjGBGP2gutKpQHA8d',
+    artists: [ [Object], [Object], [Object] ],
+    tracks: {
+      href: 'https://api.spotify.com/v1/albums/0hbwAcjGBGP2gutKpQHA8d/tracks?offset=0&limit=50',
+      limit: 50,
+      next: null,
+      offset: 0,
+      previous: null,
+      total: 1,
+      items: [Array]
+    },
+    copyrights: [ [Object] ],
+    external_ids: { upc: '886449305001' },
+    genres: [],
+    label: 'Columbia',
+    popularity: 53
+  }
+}
+{
+  added_at: '2021-07-13T17:10:10Z',
+  album: {
+    album_type: 'single',
+    total_tracks: 1,
+    available_markets: [
+      'AR', 'AU', 'AT', 'BE', 'BO', 'BR', 'BG', 'CA', 'CL', 'CO',
+      'CR', 'CY', 'CZ', 'DK', 'DO', 'DE', 'EC', 'EE', 'SV', 'FI',
+      'FR', 'GR', 'GT', 'HN', 'HK', 'HU', 'IS', 'IE', 'IT', 'LV',
+      'LT', 'LU', 'MY', 'MT', 'MX', 'NL', 'NZ', 'NI', 'NO', 'PA',
+      'PY', 'PE', 'PH', 'PL', 'PT', 'SG', 'SK', 'ES', 'SE', 'CH',
+      'TW', 'TR', 'UY', 'US', 'GB', 'AD', 'LI', 'MC', 'ID', 'JP',
+      'TH', 'VN', 'RO', 'IL', 'ZA', 'SA', 'AE', 'BH', 'QA', 'OM',
+      'KW', 'EG', 'MA', 'DZ', 'TN', 'LB', 'JO', 'PS', 'IN', 'BY',
+      'KZ', 'MD', 'UA', 'AL', 'BA', 'HR', 'ME', 'MK', 'RS', 'SI',
+      'KR', 'BD', 'PK', 'LK', 'GH', 'KE', 'NG', 'TZ', 'UG', 'AG',
+      ... 85 more items
+    ],
+    external_urls: {
+      spotify: 'https://open.spotify.com/album/2sDzlAcw6kSOGiuLOkzss7'
+    },
+    href: 'https://api.spotify.com/v1/albums/2sDzlAcw6kSOGiuLOkzss7',
+    id: '2sDzlAcw6kSOGiuLOkzss7',
+    images: [ [Object], [Object], [Object] ],
+    name: 'Home (Keygen Flip) [From "Undertale"]',
+    release_date: '2016-12-09',
+    release_date_precision: 'day',
+    type: 'album',
+    uri: 'spotify:album:2sDzlAcw6kSOGiuLOkzss7',
+    artists: [ [Object], [Object] ],
+    tracks: {
+      href: 'https://api.spotify.com/v1/albums/2sDzlAcw6kSOGiuLOkzss7/tracks?offset=0&limit=50',
+      limit: 50,
+      next: null,
+      offset: 0,
+      previous: null,
+      total: 1,
+      items: [Array]
+    },
+    copyrights: [ [Object], [Object] ],
+    external_ids: { upc: '840095885881' },
+    genres: [],
+    label: 'GameChops',
+    popularity: 14
+  }
+}
+{
+  added_at: '2021-07-13T17:09:44Z',
+  album: {
+    album_type: 'single',
+    total_tracks: 1,
+    available_markets: [
+      'AR', 'AU', 'AT', 'BE', 'BO', 'BR', 'BG', 'CA', 'CL', 'CO',
+      'CR', 'CY', 'CZ', 'DK', 'DO', 'DE', 'EC', 'EE', 'SV', 'FI',
+      'FR', 'GR', 'GT', 'HN', 'HK', 'HU', 'IS', 'IE', 'IT', 'LV',
+      'LT', 'LU', 'MY', 'MT', 'MX', 'NL', 'NZ', 'NI', 'NO', 'PA',
+      'PY', 'PE', 'PH', 'PL', 'PT', 'SG', 'SK', 'ES', 'SE', 'CH',
+      'TW', 'TR', 'UY', 'US', 'GB', 'AD', 'LI', 'MC', 'ID', 'JP',
+      'TH', 'VN', 'RO', 'IL', 'ZA', 'SA', 'AE', 'BH', 'QA', 'OM',
+      'KW', 'EG', 'MA', 'DZ', 'TN', 'LB', 'JO', 'PS', 'IN', 'BY',
+      'KZ', 'MD', 'UA', 'AL', 'BA', 'HR', 'ME', 'MK', 'RS', 'SI',
+      'KR', 'BD', 'PK', 'LK', 'GH', 'KE', 'NG', 'TZ', 'UG', 'AG',
+      ... 85 more items
+    ],
+    external_urls: {
+      spotify: 'https://open.spotify.com/album/2oFrFcC6GYP08ZYbzmuYkb'
+    },
+    href: 'https://api.spotify.com/v1/albums/2oFrFcC6GYP08ZYbzmuYkb',
+    id: '2oFrFcC6GYP08ZYbzmuYkb',
+    images: [ [Object], [Object], [Object] ],
+    name: 'Problems',
+    release_date: '2019-07-02',
+    release_date_precision: 'day',
+    type: 'album',
+    uri: 'spotify:album:2oFrFcC6GYP08ZYbzmuYkb',
+    artists: [ [Object], [Object] ],
+    tracks: {
+      href: 'https://api.spotify.com/v1/albums/2oFrFcC6GYP08ZYbzmuYkb/tracks?offset=0&limit=50',
+      limit: 50,
+      next: null,
+      offset: 0,
+      previous: null,
+      total: 1,
+      items: [Array]
+    },
+    copyrights: [ [Object], [Object] ],
+    external_ids: { upc: '703980545911' },
+    genres: [],
+    label: 'Monstercat',
+    popularity: 19
+  }
+}
+{
+  added_at: '2021-05-28T01:34:05Z',
+  album: {
+    album_type: 'single',
+    total_tracks: 1,
+    available_markets: [
+      'AR', 'AU', 'AT', 'BE', 'BO', 'BR', 'BG', 'CA', 'CL', 'CO',
+      'CR', 'CY', 'CZ', 'DK', 'DO', 'DE', 'EC', 'EE', 'SV', 'FI',
+      'FR', 'GR', 'GT', 'HN', 'HK', 'HU', 'IS', 'IE', 'IT', 'LV',
+      'LT', 'LU', 'MY', 'MT', 'MX', 'NL', 'NZ', 'NI', 'NO', 'PA',
+      'PY', 'PE', 'PH', 'PL', 'PT', 'SG', 'SK', 'ES', 'SE', 'CH',
+      'TW', 'TR', 'UY', 'US', 'GB', 'AD', 'LI', 'MC', 'ID', 'JP',
+      'TH', 'VN', 'RO', 'IL', 'ZA', 'SA', 'AE', 'BH', 'QA', 'OM',
+      'KW', 'EG', 'MA', 'DZ', 'TN', 'LB', 'JO', 'PS', 'IN', 'BY',
+      'KZ', 'MD', 'UA', 'AL', 'BA', 'HR', 'ME', 'MK', 'RS', 'SI',
+      'KR', 'BD', 'PK', 'LK', 'GH', 'KE', 'NG', 'TZ', 'UG', 'AG',
+      ... 85 more items
+    ],
+    external_urls: {
+      spotify: 'https://open.spotify.com/album/6nC2XJQzEnjN6ZJj1Hjhsk'
+    },
+    href: 'https://api.spotify.com/v1/albums/6nC2XJQzEnjN6ZJj1Hjhsk',
+    id: '6nC2XJQzEnjN6ZJj1Hjhsk',
+    images: [ [Object], [Object], [Object] ],
+    name: 'Sauce Boy Freestyle 4',
+    release_date: '2021-05-20',
+    release_date_precision: 'day',
+    type: 'album',
+    uri: 'spotify:album:6nC2XJQzEnjN6ZJj1Hjhsk',
+    artists: [ [Object] ],
+    tracks: {
+      href: 'https://api.spotify.com/v1/albums/6nC2XJQzEnjN6ZJj1Hjhsk/tracks?offset=0&limit=50',
+      limit: 50,
+      next: null,
+      offset: 0,
+      previous: null,
+      total: 1,
+      items: [Array]
+    },
+    copyrights: [ [Object], [Object] ],
+    external_ids: { upc: '196006673260' },
+    genres: [],
+    label: 'Rimas Entertainment LLC',
+    popularity: 30
+  }
+}
+{
+  added_at: '2021-05-08T01:21:50Z',
+  album: {
+    album_type: 'album',
+    total_tracks: 12,
+    available_markets: [],
+    external_urls: {
+      spotify: 'https://open.spotify.com/album/0wHDdwLUroXgyW2xnQKOeo'
+    },
+    href: 'https://api.spotify.com/v1/albums/0wHDdwLUroXgyW2xnQKOeo',
+    id: '0wHDdwLUroXgyW2xnQKOeo',
+    images: [ [Object], [Object], [Object] ],
+    name: 'Let The Bad Times Roll',
+    release_date: '2021-04-16',
+    release_date_precision: 'day',
+    type: 'album',
+    uri: 'spotify:album:0wHDdwLUroXgyW2xnQKOeo',
+    artists: [ [Object] ],
+    tracks: {
+      href: 'https://api.spotify.com/v1/albums/0wHDdwLUroXgyW2xnQKOeo/tracks?offset=0&limit=50',
+      limit: 50,
+      next: null,
+      offset: 0,
+      previous: null,
+      total: 12,
+      items: [Array]
+    },
+    copyrights: [ [Object], [Object] ],
+    external_ids: { upc: '00888072230293' },
+    genres: [],
+    label: 'Concord Records',
+    popularity: 0
+  }
+}
+{
+  added_at: '2021-03-01T13:43:13Z',
+  album: {
+    album_type: 'single',
+    total_tracks: 1,
+    available_markets: [
+      'AR', 'AU', 'AT', 'BE', 'BO', 'BR', 'BG', 'CA', 'CL', 'CO',
+      'CR', 'CY', 'CZ', 'DK', 'DO', 'DE', 'EC', 'EE', 'SV', 'FI',
+      'FR', 'GR', 'GT', 'HN', 'HK', 'HU', 'IS', 'IE', 'IT', 'LV',
+      'LT', 'LU', 'MY', 'MT', 'MX', 'NL', 'NZ', 'NI', 'NO', 'PA',
+      'PY', 'PE', 'PH', 'PL', 'PT', 'SG', 'SK', 'ES', 'SE', 'CH',
+      'TW', 'TR', 'UY', 'US', 'GB', 'AD', 'LI', 'MC', 'ID', 'JP',
+      'TH', 'VN', 'RO', 'IL', 'ZA', 'SA', 'AE', 'BH', 'QA', 'OM',
+      'KW', 'EG', 'MA', 'DZ', 'TN', 'LB', 'JO', 'PS', 'IN', 'BY',
+      'KZ', 'MD', 'UA', 'AL', 'BA', 'HR', 'ME', 'MK', 'RS', 'SI',
+      'KR', 'BD', 'PK', 'LK', 'GH', 'KE', 'NG', 'TZ', 'UG', 'AG',
+      ... 85 more items
+    ],
+    external_urls: {
+      spotify: 'https://open.spotify.com/album/6sGWFXm5IKtTBMFdIhNB9C'
+    },
+    href: 'https://api.spotify.com/v1/albums/6sGWFXm5IKtTBMFdIhNB9C',
+    id: '6sGWFXm5IKtTBMFdIhNB9C',
+    images: [ [Object], [Object], [Object] ],
+    name: 'RISE',
+    release_date: '2018-09-28',
+    release_date_precision: 'day',
+    type: 'album',
+    uri: 'spotify:album:6sGWFXm5IKtTBMFdIhNB9C',
+    artists: [ [Object], [Object], [Object] ],
+    tracks: {
+      href: 'https://api.spotify.com/v1/albums/6sGWFXm5IKtTBMFdIhNB9C/tracks?offset=0&limit=50',
+      limit: 50,
+      next: null,
+      offset: 0,
+      previous: null,
+      total: 1,
+      items: [Array]
+    },
+    copyrights: [ [Object], [Object] ],
+    external_ids: { upc: '8718857592600' },
+    genres: [],
+    label: 'Riot Games',
+    popularity: 65
+  }
+}

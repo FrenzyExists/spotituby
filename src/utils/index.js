@@ -67,6 +67,7 @@ const identifyUrlType = url => {
  * @param {string} clientSecret The Spotify client secret
  * @returns {Promise<string>} The access token
  * @throws An error if the token could not be fetched
+ * @deprecated Dont use this, use getAuthToken instead
  */
 const getClientAccessToken = async (clientId, clientSecret) => {
   try {
@@ -93,6 +94,42 @@ const getClientAccessToken = async (clientId, clientSecret) => {
   }
 };
 
+
+const getAuthToken = async () => {
+  if (fs.existsSync(TOKENFILE)) {
+    const token = fs.readFileSync(TOKENFILE, "utf-8");
+    const test = await fetchMe(token);
+
+    if (test !== null) {
+      return token;
+    }
+  }
+
+  // Start authentication server
+  const server = fork(resolve(dirname(fileURLToPath(import.meta.url)), "../server.js"));
+  const sleep = async ms => new Promise(r => setTimeout(r, ms));
+
+  await sleep(2000);
+  
+  return new Promise(async (resolve, reject) => {
+    const login = await loginToSpotify();
+    if (!login) {
+      server.kill();
+      reject(new Error("Failed to login"));
+      return;
+    }
+
+    server.on("message", async (authorizationCode) => {
+      console.log("Authorization code received");
+      // Save token to file
+      fs.writeFileSync(TOKENFILE, authorizationCode);
+      server.kill();
+      resolve(authorizationCode);
+    });
+  });
+};
+
+
 /**
  * Fetches the user object from the Spotify API using the given access token.
  *
@@ -106,8 +143,11 @@ const fetchMe = async accessToken => {
         Authorization: `Bearer ${accessToken}`
       }
     });
+	  // console.log(me)
+	  // console.log("information about me")
     return me.data;
   } catch (error) {
+    // console.log(error)
     return null;
   }
 };
@@ -134,9 +174,16 @@ const fetchTrack = async (accessToken, track_name, track_artist) => {
  */
 const fetchPlaylists = async (accessToken, page_size = -1) => {
   let playlists = [];
-  let nextUrl = `https://api.spotify.com/v1/me/playlists?limit=${page_size === -1 ? 50 : page_size}`; // Default limit is 50 for fetching all
+  let nextUrl = `https://api.spotify.com/v1/me/playlists?limit=${page_size === -1 ? 50 : page_size}`;
 
   try {
+    // First verify the token is valid
+    const user = await fetchMe(accessToken);
+    if (!user) {
+      // Get new token if current one is invalid
+      accessToken = await getAuthToken();
+    }
+
     while (nextUrl) {
       const response = await axios.get(nextUrl, {
         headers: {
@@ -144,10 +191,7 @@ const fetchPlaylists = async (accessToken, page_size = -1) => {
         },
       });
 
-      // Add the current page's playlists to the list
       playlists = playlists.concat(response.data.items);
-
-      // If page_size is -1, continue fetching until there are no more pages
       nextUrl = page_size === -1 ? response.data.next : null;
     }
     
@@ -276,7 +320,7 @@ const searchAndDownloadYTTrack = async ({
       const filterQuery = `--reject-title \"official video|music video\"`;
 
       const searchCommand = `yt-dlp ${searchQuery} ${filterQuery} --print \"%(webpage_url)s\" 2>/dev/null | head -n 1`;
-      console.log(`Executing search command: ${searchCommand}`);
+      // console.log(`Executing search command: ${searchCommand}`);
 
       url = await executeCommand(searchCommand);
 
@@ -299,7 +343,7 @@ const searchAndDownloadYTTrack = async ({
     const downloadQuery = `-x --audio-format mp3 -o \"${outputDir}/${n}.%(ext)s\" --quiet --progress --progress-template \"%(progress._percent_str)s - %(progress._total_bytes_str)s ETA %(progress._eta_str)s\"`;
     const downloadCommand = `yt-dlp ${url} ${downloadQuery}`;
 
-    console.log(`Executing download command: ${downloadCommand}`);
+    // console.log(`Executing download command: ${downloadCommand}`);
 
     await executeCommand(downloadCommand);
 
@@ -466,7 +510,7 @@ const writeMetadata = async (info, filepath) => {
   };
   
   let f = filepath.replace(/\.[^/.]+$/, ".mp3");
-  console.log(f);
+  // console.log(f);
   
   NodeID3.update(tags, f, (e, buff) => {});
 };
@@ -485,5 +529,6 @@ export {
   fetchMe,
   fetchLikedTracks,
   trackSelector,
-  fetchTrack
+  fetchTrack,
+  getAuthToken
 };

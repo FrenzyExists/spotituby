@@ -130,6 +130,7 @@ const navigateSpotify = async (token) => {
   }
 
   const user = await fetchMe(token);
+  // console.log(user);
   console.log(`welcome ${user.display_name}`);
 
   let playlists = await fetchPlaylists(token);
@@ -265,80 +266,125 @@ const serverMode = (url) => {
 //////////////////////////////////////////////////////////////////////////////
 
 
-async function loginToSpotify() {
-  let browser = await puppeteer.launch({
-    headless: true
-  });
-  const page = await browser.newPage();
+async function loginToSpotify(maxAttempts = 3) {
+  let attempts = 0;
+  let browser;
 
-  await page.goto('http://localhost:3000/login');
+  while (attempts < maxAttempts) {
+    try {
+      browser = await puppeteer.launch({
+        headless: true
+      });
+      const page = await browser.newPage();
 
-  const username = await input({
-    message: "Enter your username or email:",
-  });
-  const password_field = await password({
-    message: "Enter your password:",
-    mask: true,
-    validate: (input) => {
-      if (input.length < 6) {
-        return "Password must be at least 6 characters long";
+      await page.goto('http://localhost:3000/login');
+
+      const username = await input({
+        message: `Enter your username or email (attempt ${attempts + 1}/${maxAttempts}):`,
+      });
+      const password_field = await password({
+        message: `Enter your password (attempt ${attempts + 1}/${maxAttempts}):`,
+        mask: true,
+        validate: (input) => {
+          if (input.length < 6) {
+            return "Password must be at least 6 characters long";
+          }
+          return true;
+        }
+      });
+
+      // Wait for the username and password fields to load
+      await page.waitForSelector('#login-username', {
+        visible: true
+      });
+      await page.waitForSelector('#login-password', {
+        visible: true
+      });
+
+      // Fill in the login form and submit
+      await page.type('#login-username', username);
+      await page.type('#login-password', password_field);
+
+      // Click the login button
+      await page.click('#login-button');
+
+      console.log("Logging in...");
+
+      try {
+        console.log("Authorizing app to spotify account...");
+        // Wait for navigation
+        await page.waitForNavigation();
+    
+        // Wait for the selector
+        await page.waitForSelector('.Button-sc-qlcn5g-0.hVnPpH', {
+          timeout: 5000,
+        });
+        // Click the button
+        await page.click('.Button-sc-qlcn5g-0.hVnPpH');
+      } catch (e) {
+        console.log("App is already authorized.");
       }
-      return true;
+
+      try {
+        const errorMessage = await page.waitForSelector('.sc-gLXSEc.eZHyFP', {
+          visible: true,
+          timeout: 2000
+        }).catch(() => null);
+
+        if (errorMessage) {
+          console.log('Login failed. Please check your credentials.');
+          attempts++;
+          
+          if (attempts < maxAttempts) {
+            console.log(`You have ${maxAttempts - attempts} attempts remaining.`);
+            await browser.close();
+            continue;
+          } else {
+            await browser.close();
+            return false;
+          }
+        } else {
+          console.log('Login successful!');
+          await browser.close();
+          return true;
+        }
+      } catch (error) {
+        if (error.name === 'TimeoutError') {
+          // If we don't find an error message within timeout, assume login was successful
+          console.log('Login successful!');
+          await browser.close();
+          return true;
+        } else {
+          console.error('An unexpected error occurred during login:', error);
+          attempts++;
+          
+          if (attempts < maxAttempts) {
+            console.log(`You have ${maxAttempts - attempts} attempts remaining.`);
+            await browser.close();
+            continue;
+          } else {
+            await browser.close();
+            return false;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('An error occurred during login:', error);
+      attempts++;
+      
+      if (attempts < maxAttempts) {
+        console.log(`You have ${maxAttempts - attempts} attempts remaining.`);
+        if (browser) await browser.close();
+        continue;
+      } else {
+        if (browser) await browser.close();
+        return false;
+      }
     }
-  })
-
-  // Wait for the username and password fields to load
-  await page.waitForSelector('#login-username', {
-    visible: true
-  });
-  await page.waitForSelector('#login-password', {
-    visible: true
-  });
-
-  // Fill in the login form and submit
-  await page.type('#login-username', username);
-  await page.type('#login-password', password_field);
-
-  // Click the login button
-  await page.click('#login-button');
-
-  console.log("Logging in...");
-
-  try {
-    console.log("Authorizing app to spotify account...");
-    // Wait for navigation
-    await page.waitForNavigation();
-  
-    // Wait for the selector
-    await page.waitForSelector('.Button-sc-qlcn5g-0.hVnPpH', {
-      timeout: 5000,
-    });
-    // Click the button
-    await page.click('.Button-sc-qlcn5g-0.hVnPpH');
-  } catch (e) {
-    console.log("App is already authorized.");
   }
 
-  try {
-    const errorMessage = await page.waitForSelector('.sc-gLXSEc.eZHyFP', {
-      visible: true,
-      timeout: 2000
-    }).catch(() => null);
-
-    if (errorMessage) {
-      console.log('Login failed. Please check your credentials.');
-      await browser.close();
-      return false;
-    } else {
-      console.log('Login successful!');
-      browser.close();
-      return true;
-    }
-  } catch (error) {
-    console.error('An error occurred during login:', error);
-    await browser.close();
-    return false;
-  }
+  console.log('Maximum login attempts reached. Please try again later.');
+  return false;
 }
 
 
@@ -439,6 +485,10 @@ const main = () => {
       "--url <url>",
       "URL to process (YouTube or Spotify) playlist or track"
     )
+    .option(
+      "--reset",
+      "Reset stored credentials and start fresh"
+    )
     .addHelpText(
       "after",
       `
@@ -446,14 +496,33 @@ const main = () => {
     spotituby --mode cli
     spotituby --mode cli --url https://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI
     spotituby --mode cli --url https://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji
+    spotituby --reset    # Reset stored credentials
     `
     );
 
   program.parse(process.argv);
 
-  const mode = program.opts().mode;
-  const url = program.opts().url;
-  const download_path = program.opts().path
+  const options = program.opts();
+  const mode = options.mode;
+  const url = options.url;
+  const download_path = options.path;
+  const reset = options.reset;
+
+  // Handle reset option
+  if (reset) {
+    try {
+      if (fs.existsSync(TOKENFILE)) {
+        fs.unlinkSync(TOKENFILE);
+        console.log('\x1b[32m%s\x1b[0m', '✔ Credentials reset successfully');
+      } else {
+        console.log('\x1b[33m%s\x1b[0m', 'ℹ No stored credentials found');
+      }
+      process.exit(0);
+    } catch (error) {
+      console.error('\x1b[31m%s\x1b[0m', '✘ Error resetting credentials:', error.message);
+      process.exit(1);
+    }
+  }
 
   if (mode === "cli") {
     cliMode(url, download_path);
