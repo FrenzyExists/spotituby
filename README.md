@@ -7,9 +7,6 @@
 [![GitHub package.json version](https://img.shields.io/github/package-json/v/FrenzyExists/spotituby?style=for-the-badge&logo=github&color=F4A4B5)](https://github.com/FrenzyExists/spotituby)
 [![npm](https://img.shields.io/npm/dt/spotituby?style=for-the-badge&logo=npm&color=CB3837)](https://www.npmjs.com/package/spotituby)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge&color=98C379)](LICENSE)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=for-the-badge&color=61AFEF)](http://makeapullrequest.com)
-
-<img src="assets/demo.gif" alt="Spotituby Demo" width="600px">
 
 </div>
 
@@ -46,7 +43,7 @@ Before you begin, ensure you have the following installed:
 
 - **Python 3** - [Download](https://python.org)
   ```bash
-  python3 --version  # Should be >= 3.7
+  python3 --version  # Should be >= 3.12
   ```
 
 - **yt-dlp** - For YouTube downloads
@@ -129,7 +126,7 @@ spotituby --mode cli
 spotituby --reset
 
 # Force new login
-spotituby --mode cli --force-login
+spotituby --mode cli
 ```
 </details>
 
@@ -153,9 +150,7 @@ Give a ⭐️ if this project helped you!
 
 ## 📧 Contact
 
-Your Name - [@your_twitter](https://twitter.com/your_twitter)
-
-Project Link: [https://github.com/FrenzyExists/spotituby](https://github.com/FrenzyExists/spotituby)
+Detective Pikachu - [@Not__Pikachu](https://twitter.com/Not__Pikachu)
 
 ---
 
