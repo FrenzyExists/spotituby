@@ -14,7 +14,8 @@ import {
   fetchLikedTracks,
   printHeader,
   getAuthToken,
-  killPort
+  killPort,
+  navigateSpotifyTracks
 } from "./src/utils/index.js";
 import {
   Command
@@ -33,7 +34,7 @@ import {
 } from "child_process";
 import fs from "fs";
 import os from "os";
-import sync from "./src/utils/sync.js";
+import SyncDaemon from "./src/utils/sync.js";
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -166,68 +167,6 @@ const navigateSpotify = async (token) => {
   });
   return selectPlaylist;
 };
-
-/**
- * Navigates Spotify tracks based on the provided playlist ID and downloads them.
- *
- * @param {string} token - The access token for Spotify API authentication.
- * @param {string} playlistId - The ID of the playlist to fetch tracks from.
- * @param {string} download_path - The directory path where the tracks will be downloaded.
- * @param {number} track_size - The maximum number of tracks to fetch from the playlist.
- * @throws {Error} Throws an error if no tracks are found in the playlist.
- * @returns {Promise<void>} A promise that resolves when the tracks have been processed.
- */
-const navigateSpotifyTracks = async (token, playlistId, download_path, track_size) => {
-  try {
-    // console.log(playlistId);
-    let tracks = null
-    if (playlistId !== 'liked-songs') {
-      ;
-      tracks = await fetchPlaylistTracks(token, playlistId, track_size);
-    } else {
-      tracks = await fetchLikedTracks(token, track_size);
-    }
-
-    if (!tracks) {
-      throw new Error("No tracks found in the playlist.");
-    }
-
-    const choices = tracks
-      .map((t) => {
-
-        return {
-          name: `${t.track.name} - ${t.track.artists.map((a) => a.name).join(", ")}`, // Visible to user
-          value: {
-            name: t.track.name,
-            duration_ms: t.track.duration_ms,
-            artist: t.track.artists.map((a) => a.name),
-            album: t.track.album.name,
-            image: t.track.album.images?.[0]?.url || "",
-            album_url: t.track.album.href,
-            external_url: t.track.external_urls.spotify,
-            popularity: t.track.popularity,
-            disk_number: t.track.disc_number,
-            track_number: t.track.track_number,
-            release_date: t.track.album.release_date,
-            type: t.track.type,
-            explicit: t.track.explicit,
-            isrc: t.track.external_ids.isrc
-          },
-        };
-      });
-
-    trackSelector(choices).then(async (selectedTracks) => selectedTracks.map((t) => {
-      if (!t.artist || t.artist.length === 0) {
-        console.warn(`Skipping track: ${t.name} due to missing artist information.`);
-        return;
-      }
-
-      searchAndDownloadYTTrack({ metadata: t, outputDir: download_path, search: true });
-    }))
-  } catch (error) {
-    console.error(`Error: ${error.message}`);
-  }
-}
 
 
 /**
@@ -377,10 +316,11 @@ const main = () => {
     cliMode(url, download_path);
   } else if (mode === "sync") {
     // TODO: implement daemon mode for v1.0.3
-    const watchDir = options.watchDir || `${HOME}/Music`;
+    const watchDir = options.watchDir || `${HOME}/Downloads`;
     const interval = parseInt(options.interval) || 30;
 
-    sync.watcherSetup(watchDir)
+    // const daemon = new SyncDaemon(watchDir, interval);
+    // daemon.start()
 
   } else {
     program.outputHelp();
