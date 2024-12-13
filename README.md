@@ -7,7 +7,8 @@
 [![GitHub package.json version](https://img.shields.io/github/package-json/v/FrenzyExists/spotituby?style=for-the-badge&logo=github&color=F4A4B5)](https://github.com/FrenzyExists/spotituby)
 [![npm](https://img.shields.io/npm/dt/spotituby?style=for-the-badge&logo=npm&color=CB3837)](https://www.npmjs.com/package/spotituby)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg?style=for-the-badge&color=98C379)](LICENSE)
-
+<a href="https://github.com/FrenzyExists/spotituby/stargazers"><img src="https://img.shields.io/github/stars/FrenzyExists/spotituby?style=for-the-badge&logo=starship style=flat-square"></a>
+<a href="https://github.com/FrenzyExists/spotituby/issues"><img src="https://img.shields.io/github/issues/FrenzyExists/spotituby?style=for-the-badge&logo=bugatti"></a>
 </div>
 
 ## ✨ Features
