@@ -2,10 +2,6 @@
 
 import {
   select,
-  checkbox,
-  input,
-  password,
-  search
 } from "@inquirer/prompts";
 import {
   identifyUrlType,
@@ -16,7 +12,9 @@ import {
   trackSelector,
   TOKENFILE,
   fetchLikedTracks,
-  printHeader
+  printHeader,
+  getAuthToken,
+  killPort
 } from "./src/utils/index.js";
 import {
   Command
@@ -34,9 +32,9 @@ import {
   spawn
 } from "child_process";
 import fs from "fs";
-import puppeteer from "puppeteer";
 import os from "os";
-import { deprecate } from "util";
+import sync from "./src/utils/sync.js";
+
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -81,8 +79,6 @@ const getYTPlaylist = async (url, outputDir) => {
 
     process.on("close", (code) => {
       if (code === 0) {
-        // console.log(choices); // debug
-        
         // Ensure choices is always an array and map to required format
         resolve(
           choices.map((v) => ({
@@ -99,8 +95,8 @@ const getYTPlaylist = async (url, outputDir) => {
 
   try {
     const playlist = await c;
-    
-    await trackSelector(playlist).then((selectedTracks) =>{
+
+    await trackSelector(playlist).then((selectedTracks) => {
       selectedTracks.map((t) => {
         searchAndDownloadYTTrack({
           url: t.url,
@@ -131,11 +127,10 @@ const navigateSpotify = async (token) => {
   }
 
   const user = await fetchMe(token);
-  // console.log(user);
   console.log(`welcome ${user.display_name}`);
 
   let playlists = await fetchPlaylists(token);
-  
+
   const liked = await fetchLikedTracks(token)
   // let l = liked.items.map(tr => tr.track)
 
@@ -149,7 +144,7 @@ const navigateSpotify = async (token) => {
   let choices = [];
   let n = 1
   playlists.map((pl) => {
-    if(pl) { // getting null values for some reason
+    if (pl) { // getting null values for some reason
       choices.push({
         name: pl.name === "" ? `unnamed track #${n++}` : pl?.name,
         value: {
@@ -172,24 +167,34 @@ const navigateSpotify = async (token) => {
   return selectPlaylist;
 };
 
-
+/**
+ * Navigates Spotify tracks based on the provided playlist ID and downloads them.
+ *
+ * @param {string} token - The access token for Spotify API authentication.
+ * @param {string} playlistId - The ID of the playlist to fetch tracks from.
+ * @param {string} download_path - The directory path where the tracks will be downloaded.
+ * @param {number} track_size - The maximum number of tracks to fetch from the playlist.
+ * @throws {Error} Throws an error if no tracks are found in the playlist.
+ * @returns {Promise<void>} A promise that resolves when the tracks have been processed.
+ */
 const navigateSpotifyTracks = async (token, playlistId, download_path, track_size) => {
   try {
     // console.log(playlistId);
     let tracks = null
-    if (playlistId !== 'liked-songs') {;
-       tracks = await fetchPlaylistTracks(token, playlistId, track_size);
+    if (playlistId !== 'liked-songs') {
+      ;
+      tracks = await fetchPlaylistTracks(token, playlistId, track_size);
     } else {
-       tracks = await fetchLikedTracks(token, track_size);
+      tracks = await fetchLikedTracks(token, track_size);
     }
-    
+
     if (!tracks) {
       throw new Error("No tracks found in the playlist.");
     }
-  
+
     const choices = tracks
       .map((t) => {
-        
+
         return {
           name: `${t.track.name} - ${t.track.artists.map((a) => a.name).join(", ")}`, // Visible to user
           value: {
@@ -216,8 +221,8 @@ const navigateSpotifyTracks = async (token, playlistId, download_path, track_siz
         console.warn(`Skipping track: ${t.name} due to missing artist information.`);
         return;
       }
-      
-      searchAndDownloadYTTrack({metadata:t, outputDir:download_path, search: true});
+
+      searchAndDownloadYTTrack({ metadata: t, outputDir: download_path, search: true });
     }))
   } catch (error) {
     console.error(`Error: ${error.message}`);
@@ -268,144 +273,18 @@ const serverMode = (url) => {
 //////////////////////////////////////////////////////////////////////////////
 
 
-async function loginToSpotify(maxAttempts = 3) {
-  let attempts = 0;
-  let browser;
+const cliMode = async (url, download_path = `${HOME}/Music`) => {
 
-  while (attempts < maxAttempts) {
-    try {
-      browser = await puppeteer.launch({
-        headless: true
-      });
-      const page = await browser.newPage();
-
-      await page.goto('http://localhost:3000/login');
-
-      const username = await input({
-        message: `Enter your username or email (attempt ${attempts + 1}/${maxAttempts}):`,
-      });
-      const password_field = await password({
-        message: `Enter your password (attempt ${attempts + 1}/${maxAttempts}):`,
-        mask: true,
-        validate: (input) => {
-          if (input.length < 6) {
-            return "Password must be at least 6 characters long";
-          }
-          return true;
-        }
-      });
-
-      // Wait for the username and password fields to load
-      await page.waitForSelector('#login-username', {
-        visible: true
-      });
-      await page.waitForSelector('#login-password', {
-        visible: true
-      });
-
-      // Fill in the login form and submit
-      await page.type('#login-username', username);
-      await page.type('#login-password', password_field);
-
-      // Click the login button
-      await page.click('#login-button');
-
-      console.log("Logging in...");
-
-      try {
-        console.log("Authorizing app to spotify account...");
-        // Wait for navigation
-        await page.waitForNavigation();
-    
-        // Wait for the selector
-        await page.waitForSelector('.Button-sc-qlcn5g-0.hVnPpH', {
-          timeout: 5000,
-        });
-        // Click the button
-        await page.click('.Button-sc-qlcn5g-0.hVnPpH');
-      } catch (e) {
-        console.log("App is already authorized.");
-      }
-
-      try {
-        const errorMessage = await page.waitForSelector('.sc-gLXSEc.eZHyFP', {
-          visible: true,
-          timeout: 2000
-        }).catch(() => null);
-
-        if (errorMessage) {
-          console.log('Login failed. Please check your credentials.');
-          attempts++;
-          
-          if (attempts < maxAttempts) {
-            console.log(`You have ${maxAttempts - attempts} attempts remaining.`);
-            await browser.close();
-            continue;
-          } else {
-            await browser.close();
-            return false;
-          }
-        } else {
-          console.log('Login successful!');
-          await browser.close();
-          return true;
-        }
-      } catch (error) {
-        if (error.name === 'TimeoutError') {
-          // If we don't find an error message within timeout, assume login was successful
-          console.log('Login successful!');
-          await browser.close();
-          return true;
-        } else {
-          console.error('An unexpected error occurred during login:', error);
-          attempts++;
-          
-          if (attempts < maxAttempts) {
-            console.log(`You have ${maxAttempts - attempts} attempts remaining.`);
-            await browser.close();
-            continue;
-          } else {
-            await browser.close();
-            return false;
-          }
-        }
-      }
-    } catch (error) {
-      console.error('An error occurred during login:', error);
-      attempts++;
-      
-      if (attempts < maxAttempts) {
-        console.log(`You have ${maxAttempts - attempts} attempts remaining.`);
-        if (browser) await browser.close();
-        continue;
-      } else {
-        if (browser) await browser.close();
-        return false;
-      }
-    }
-  }
-
-  console.log('Maximum login attempts reached. Please try again later.');
-  return false;
-}
-
-
-const cliMode = async (url, download_path=`${HOME}/Music`) => {
-  
   const urlMode = identifyUrlType(url);
-  let token = null;
 
-  if (fs.existsSync(TOKENFILE)) {
-    token = fs.readFileSync(TOKENFILE, "utf-8");
-
-    const test = await fetchMe(token);
-
-    if (test === null) {
-      console.log("Invalid Spotify token found");
-      token = null;
-    }
+  // Kill any process running on port 3000 before starting the server
+  try {
+    await killPort(3000);
+  } catch (error) {
+    console.error(`Error killing process on port 3000: ${error.message}`);
   }
 
+  const accessToken = await getAuthToken();
   if (urlMode === "yt-playlist" || urlMode === "yt-track") {
     downloadWithYtDlp(url, download_path, urlMode);
   } else if (
@@ -413,48 +292,18 @@ const cliMode = async (url, download_path=`${HOME}/Music`) => {
     urlMode === "sy-track" ||
     urlMode === null
   ) {
-    if (token === null) {
-      const server = fork(serverPath);
-      const sleep = async ms => new Promise(r => setTimeout(r, ms));
 
-      await sleep(2000);
-      const login = await loginToSpotify();
-      if (!login) {
-        console.log("Failed to login");
-        server.kill();
-        process.exit(1);
-      }
-
-      server.on("spawn", async () => {
-        console.log(
-          "Server started\nlog in to your spotify account on http://localhost:3000/login"
-        );
-      });
-
-      server.on("message", async (authorizationCode) => {
-        console.log("Authorization code received");
-        token = authorizationCode;
-
-        // Save token to file
-        fs.writeFileSync(TOKENFILE, token);
-        const playlist = await navigateSpotify(token);
-        navigateSpotifyTracks(token, playlist.id, download_path, playlist.tracks.total);
-
-        server.kill();
-      });
-    } else {
-      console.log("Token found - skipping login");
-      const playlist = await navigateSpotify(token);
-      
-      let total = playlist.tracks.total;
-      if (!playlist.tracks.total) {
-        total = playlist.tracks.length;
-      }
-      console.log(
-        `🎵 ${playlist.name} contains ${total} tracks! 🎶`
-      );
-      navigateSpotifyTracks(token, playlist.id, download_path, total);
+    const playlist = await navigateSpotify(accessToken);
+    
+    let total = playlist.tracks.total;
+    if (!playlist.tracks.total) {
+      total = playlist.tracks.length;
     }
+    console.log(
+      `🎵 ${playlist.name} contains ${total} tracks! 🎶`
+    );
+    navigateSpotifyTracks(accessToken, playlist.id, download_path, total);
+
   } else {
     console.log("Invalid URL provided.");
     return;
@@ -478,7 +327,7 @@ const main = () => {
     .name(`\x1b[34mspotituby\x1b[0m`)
     .description(`\x1b[33mDownload music from Spotify playlists\x1b[0m`)
     .version("1.0.0")
-    .option("--mode <mode>", "Mode to run the app in (cli)")
+    .option("--mode <mode>", "Mode to run the app in (cli/sync)")
     .option(
       "--url <url>",
       "URL to process (YouTube or Spotify) playlist or track"
@@ -487,6 +336,8 @@ const main = () => {
       "--reset",
       "Reset stored credentials and start fresh"
     )
+    .option("--watch-dir <dir>", "Directory to watch for music files", `${HOME}/Music`)
+    .option("--interval <minutes>", "Sync interval in minutes", "30")
     .addHelpText(
       "after",
       `
@@ -524,8 +375,13 @@ const main = () => {
 
   if (mode === "cli") {
     cliMode(url, download_path);
-  } else if (mode === "daemon") {
-     // TODO: implement daemon mode for v1.0.3
+  } else if (mode === "sync") {
+    // TODO: implement daemon mode for v1.0.3
+    const watchDir = options.watchDir || `${HOME}/Music`;
+    const interval = parseInt(options.interval) || 30;
+
+    sync.watcherSetup(watchDir)
+
   } else {
     program.outputHelp();
   }

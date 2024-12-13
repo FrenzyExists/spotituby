@@ -1,13 +1,22 @@
 import axios from "axios";
 import validUrl from "valid-url";
-import { exec } from "child_process";
-import { confirm, checkbox } from "@inquirer/prompts";
+import { exec, fork } from "child_process";
 import NodeID3 from "node-id3";
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync, writeFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, resolve } from 'path';
+import puppeteer from "puppeteer";
+import {
+  confirm, checkbox,
+  input,
+  password
+} from "@inquirer/prompts";
+import querystring from 'querystring'
+import { client_id, secret } from "./dotenv.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const TOKENFILE = ".token";
 
 const sanitizeFileName = name => {
   return name.replace(/[<>:"/\\|?*]+/g, "");
@@ -66,6 +75,139 @@ const identifyUrlType = url => {
 };
 
 /**
+ * Logs in to Spotify using Puppeteer to automate the login process.
+ *
+ * This function attempts to log in to a Spotify account by navigating to the login page,
+ * entering the username and password, and handling any potential errors or authorization
+ * prompts. It will retry the login process a specified number of times if it fails.
+ *
+ * @param {number} [maxAttempts=3] - The maximum number of login attempts before failing.
+ * @returns {Promise<boolean>} - A promise that resolves to true if the login was successful,
+ *                               or false if it failed after the maximum number of attempts.
+ * @throws {Error} - Throws an error if an unexpected error occurs during the login process.
+ */
+async function loginToSpotify(maxAttempts = 3) {
+  let attempts = 0;
+  let browser;
+
+  while (attempts < maxAttempts) {
+    try {
+      browser = await puppeteer.launch({
+        headless: true
+      });
+      const page = await browser.newPage();
+
+      await page.goto('http://localhost:3000/login');
+
+      const username = await input({
+        message: `Enter your username or email (attempt ${attempts + 1}/${maxAttempts}):`,
+      });
+      const password_field = await password({
+        message: `Enter your password (attempt ${attempts + 1}/${maxAttempts}):`,
+        mask: true,
+        validate: (input) => {
+          if (input.length < 6) {
+            return "Password must be at least 6 characters long";
+          }
+          return true;
+        }
+      });
+
+      // Wait for the username and password fields to load
+      await page.waitForSelector('#login-username', {
+        visible: true
+      });
+      await page.waitForSelector('#login-password', {
+        visible: true
+      });
+
+      // Fill in the login form and submit
+      await page.type('#login-username', username);
+      await page.type('#login-password', password_field);
+
+      // Click the login button
+      await page.click('#login-button');
+
+      console.log("Logging in...");
+
+      try {
+        console.log("Authorizing app to spotify account...");
+        // Wait for navigation
+        await page.waitForNavigation();
+
+        // Wait for the selector
+        await page.waitForSelector('.Button-sc-qlcn5g-0.hVnPpH', {
+          timeout: 5000,
+        });
+        // Click the button
+        await page.click('.Button-sc-qlcn5g-0.hVnPpH');
+      } catch (e) {
+        console.log("App is already authorized.");
+      }
+
+      try {
+        const errorMessage = await page.waitForSelector('.sc-gLXSEc.eZHyFP', {
+          visible: true,
+          timeout: 2000
+        }).catch(() => null);
+
+        if (errorMessage) {
+          console.log('Login failed. Please check your credentials.');
+          attempts++;
+
+          if (attempts < maxAttempts) {
+            console.log(`You have ${maxAttempts - attempts} attempts remaining.`);
+            await browser.close();
+            continue;
+          } else {
+            await browser.close();
+            return false;
+          }
+        } else {
+          console.log('Login successful!');
+          await browser.close();
+          return true;
+        }
+      } catch (error) {
+        if (error.name === 'TimeoutError') {
+          // If we don't find an error message within timeout, assume login was successful
+          console.log('Login successful!');
+          await browser.close();
+          return true;
+        } else {
+          console.error('An unexpected error occurred during login:', error);
+          attempts++;
+
+          if (attempts < maxAttempts) {
+            console.log(`You have ${maxAttempts - attempts} attempts remaining.`);
+            await browser.close();
+            continue;
+          } else {
+            await browser.close();
+            return false;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('An error occurred during login:', error);
+      attempts++;
+
+      if (attempts < maxAttempts) {
+        console.log(`You have ${maxAttempts - attempts} attempts remaining.`);
+        if (browser) await browser.close();
+        continue;
+      } else {
+        if (browser) await browser.close();
+        return false;
+      }
+    }
+  }
+
+  console.log('Maximum login attempts reached. Please try again later.');
+  return false;
+}
+
+/**
  * Fetches a Spotify access token using the client credentials flow.
  *
  * @param {string} clientId The Spotify client ID
@@ -92,48 +234,112 @@ const getClientAccessToken = async (clientId, clientSecret) => {
       }
     );
 
-    return tokenResponse.data.access_token;
+    const newAccessToken = tokenResponse.data.access_token;
+    const refreshToken = tokenResponse.data.refresh_token;
+    const expiresIn = tokenResponse.data.expires_in;
+    const expiresAt = Date.now() + expiresIn * 1000; // Calculate expiry time in milliseconds
+
+    return {
+      accessToken: newAccessToken,
+      refreshToken: refreshToken,
+      expiresIn: expiresIn,
+      expiresAt: expiresAt
+    };
   } catch (error) {
     console.error("Error fetching access token:", error);
     throw error;
   }
 };
 
+// New function to refresh the access token
+const refreshAccessToken = async (refreshToken) => {
+  console.log(refreshToken, "NIGS");
+  
+  try {
+    const tokenResponse = await axios.post(
+      "https://accounts.spotify.com/api/token",
+      querystring.stringify({
+        grant_type: "refresh_token",
+        refresh_token: refreshToken,
+        client_id: client_id,
+        client_secret: secret
+      }),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
 
+    const newAccessToken = tokenResponse.data.access_token;
+    const newRefreshToken = tokenResponse.data.refresh_token;
+    const expiresIn = tokenResponse.data.expires_in;
+    const expiresAt = Date.now() + expiresIn * 1000; // Calculate expiry time in milliseconds
+
+    return {
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+      expiresIn: expiresIn,
+      expiresAt: expiresAt
+    };
+  } catch (error) {
+    console.error("Error refreshing access token:", error.message);
+    return null;
+  }
+};
+
+
+/**
+ * 
+ * @returns 
+ */
 const getAuthToken = async () => {
-  if (fs.existsSync(TOKENFILE)) {
-    const token = fs.readFileSync(TOKENFILE, "utf-8");
-    const test = await fetchMe(token);
+  if (existsSync(TOKENFILE)) {
+    const { accessToken, refreshToken, expiresAt } = JSON.parse(readFileSync(TOKENFILE, "utf-8"));
 
-    if (test !== null) {
-      return token;
+    // Check if the token is expired
+    if (Date.now() < expiresAt) {
+      return accessToken; // Token is still valid
+    } else {
+      // Token has expired, refresh it
+      const newToken = await refreshAccessToken(refreshToken);
+      if (newToken) {
+        // Save the new token and its expiry time
+        writeFileSync(TOKENFILE, JSON.stringify(newToken));
+        return newToken.accessToken;
+      }
     }
   }
 
-  // Start authentication server
-  const server = fork(resolve(dirname(fileURLToPath(import.meta.url)), "../server.js"));
+  // try {
+  //   await killPort(3000);
+  // } catch (error) {
+  //   console.error(`Error killing process on port 3000: ${error.message}`);
+  // }
+
+  const server_path = resolve(__dirname, "../", "server.js")
+  const server = fork(server_path);
   const sleep = async ms => new Promise(r => setTimeout(r, ms));
 
-  await sleep(2000);
-  
+  await sleep(2000); // If I dont use this I get a weird race condition
+
   return new Promise(async (resolve, reject) => {
     const login = await loginToSpotify();
     if (!login) {
-      server.kill();
+      server.kill()
       reject(new Error("Failed to login"));
       return;
     }
 
-    server.on("message", async (authorizationCode) => {
+    server.on("message", async (authorization_code) => {
       console.log("Authorization code received");
-      // Save token to file
-      fs.writeFileSync(TOKENFILE, authorizationCode);
+      writeFileSync(TOKENFILE, JSON.stringify(authorization_code));
       server.kill();
-      resolve(authorizationCode);
+      const newAccessToken = authorization_code.accessToken;
+      resolve(newAccessToken);
     });
   });
-};
-
+}
 
 /**
  * Fetches the user object from the Spotify API using the given access token.
@@ -148,8 +354,6 @@ const fetchMe = async accessToken => {
         Authorization: `Bearer ${accessToken}`
       }
     });
-	  // console.log(me)
-	  // console.log("information about me")
     return me.data;
   } catch (error) {
     // console.log(error)
@@ -199,8 +403,8 @@ const fetchPlaylists = async (accessToken, page_size = -1) => {
       playlists = playlists.concat(response.data.items);
       nextUrl = page_size === -1 ? response.data.next : null;
     }
-    
-    playlists = playlists.filter(playlist => playlist !== null);    
+
+    playlists = playlists.filter(playlist => playlist !== null);
     return playlists;
   } catch (error) {
     console.error("Error fetching playlists:", error.message);
@@ -269,7 +473,7 @@ const getFilenameFromCommand = (metadataCommand, outputDir) => {
       filename = `${outputDir}/${data.trim()}`; // Construct the filename
     });
     console.log(filename);
-    
+
     titleProcess.on("exit", (code) => {
       if (code === 0) {
         resolve(filename);
@@ -315,7 +519,7 @@ const searchAndDownloadYTTrack = async ({
   };
 
   if (!metadata) {
-    
+
   }
 
   try {
@@ -338,7 +542,7 @@ const searchAndDownloadYTTrack = async ({
     if (!url) {
       throw new Error("A valid URL or metadata for search is required.");
     }
-    
+
 
     let n = metadata?.name;
     if (!n) {
@@ -513,10 +717,10 @@ const writeMetadata = async (info, filepath) => {
     comment: info.explicit ? "Explicit content" : "Clean content", // COMM
     originalTitle: info.name // TOAL
   };
-  
+
   let f = filepath.replace(/\.[^/.]+$/, ".mp3");
-  
-  NodeID3.update(tags, f, (e, buff) => {});
+
+  NodeID3.update(tags, f, (e, buff) => { });
 };
 
 const printHeader = () => {
@@ -535,21 +739,58 @@ const printHeader = () => {
     "  Made with ❤️ by FrenzyExists  ",
     "=========================================================="
   ];
-    // Find the longest line to calculate padding
-    const maxLength = Math.max(...headerLines.map(line => line.length));
-  
-    // Print each line centered
-    const centeredHeader = headerLines
-      .map(line => {
-        const padding = Math.max(0, Math.floor((terminalWidth - line.length) / 2));
-        return " ".repeat(padding) + `\x1b[34m${line}\x1b[0m`;
-      })
-      .join("\n");
-  
-    console.log("\n" + centeredHeader + "\n");
+  // Find the longest line to calculate padding
+  const maxLength = Math.max(...headerLines.map(line => line.length));
+
+  // Print each line centered
+  const centeredHeader = headerLines
+    .map(line => {
+      const padding = Math.max(0, Math.floor((terminalWidth - line.length) / 2));
+      return " ".repeat(padding) + `\x1b[34m${line}\x1b[0m`;
+    })
+    .join("\n");
+
+  console.log("\n" + centeredHeader + "\n");
 }
 
-const TOKENFILE = ".token";
+/**
+ * Kills any process running on the specified port.
+ *
+ * @param {number} port - The port number to check.
+ * @returns {Promise<void>}
+ */
+const killPort = (port) => {
+  return new Promise((resolve, reject) => {
+    const command = process.platform === 'win32'
+      ? `netstat -ano | findstr :${port}` // Windows command
+      : `lsof -t -i:${port}`; // Unix command
+
+    exec(command, (error, stdout) => {
+      if (error) {
+        return reject(error);
+      }
+
+      const pids = stdout.split('\n').filter(Boolean);
+      if (pids.length > 0) {
+        const killCommand = process.platform === 'win32'
+          ? `taskkill /PID ${pids.join(' /PID ')} /F` // Windows kill command
+          : `kill -9 ${pids.join(' ')}`; // Unix kill command
+
+        exec(killCommand, (killError) => {
+          if (killError) {
+            return reject(killError);
+          }
+          console.log(`Killed process(es) running on port ${port}`);
+          resolve();
+        });
+      } else {
+        resolve(); // No process found on the port
+      }
+    });
+  });
+};
+
+
 export {
   TOKENFILE,
   fetchAlbums,
@@ -565,5 +806,6 @@ export {
   trackSelector,
   fetchTrack,
   getAuthToken,
-  printHeader
+  printHeader,
+  killPort
 };
