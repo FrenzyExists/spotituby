@@ -13,6 +13,7 @@ import {
 } from "@inquirer/prompts";
 import querystring from 'querystring'
 import { client_id, secret } from "./dotenv.js";
+import { green, clr } from "./colors.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -204,9 +205,7 @@ async function loginToSpotify(maxAttempts = 3) {
         });
         // Click the button
         await page.click('.Button-sc-qlcn5g-0.hVnPpH');
-      } catch (e) {
-        console.log("App is already authorized.");
-      }
+      } catch (e) {}// dont say anything
 
       try {
         const errorMessage = await page.waitForSelector('.sc-gLXSEc.eZHyFP', {
@@ -227,7 +226,7 @@ async function loginToSpotify(maxAttempts = 3) {
             return false;
           }
         } else {
-          console.log('Login successful!');
+          console.log(`${green}Login successful!${clr}`);
           await browser.close();
           return true;
         }
@@ -316,7 +315,6 @@ const getClientAccessToken = async (clientId, clientSecret) => {
 
 // New function to refresh the access token
 const refreshAccessToken = async (refreshToken) => {
-  console.log(refreshToken, "NIGS");
   
   try {
     const tokenResponse = await axios.post(
@@ -333,15 +331,15 @@ const refreshAccessToken = async (refreshToken) => {
         },
       }
     );
-
+    console.log("REFRESH",tokenResponse.data );
+    
     const newAccessToken = tokenResponse.data.access_token;
-    const newRefreshToken = tokenResponse.data.refresh_token;
     const expiresIn = tokenResponse.data.expires_in;
     const expiresAt = Date.now() + expiresIn * 1000; // Calculate expiry time in milliseconds
 
     return {
       accessToken: newAccessToken,
-      refreshToken: newRefreshToken,
+      refreshToken: refreshToken,
       expiresIn: expiresIn,
       expiresAt: expiresAt
     };
@@ -353,55 +351,73 @@ const refreshAccessToken = async (refreshToken) => {
 
 
 /**
+ * Asynchronous function to retrieve an authorization token.
  * 
- * @returns 
+ * This function checks for an existing token file and validates its contents.
+ * If the token is expired or about to expire, it attempts to refresh it.
+ * If any error occurs during the process, it attempts to login and retrieve a new token.
+ * 
+ * @returns {Promise<string>} - A promise that resolves to the access token.
+ * @throws {Error} - Throws an error if the token file is not found or if token data is invalid.
  */
 const getAuthToken = async () => {
-  if (existsSync(TOKENFILE)) {
+  try {
+    if (!existsSync(TOKENFILE)) {
+      throw new Error("No token file found");
+    }
     const { accessToken, refreshToken, expiresAt } = JSON.parse(readFileSync(TOKENFILE, "utf-8"));
 
+    // Validate required fields
+    if (!accessToken || !refreshToken || !expiresAt) {
+      throw new Error("Invalid token data format");
+    }
+
+    const bufferTime = 60 * 1000; // 60 seconds in milliseconds
+    
     // Check if the token is expired
-    if (Date.now() < expiresAt) {
+    if (Date.now() + bufferTime < expiresAt) {
       return accessToken; // Token is still valid
-    } else {
-      // Token has expired, refresh it
-      const newToken = await refreshAccessToken(refreshToken);
-      if (newToken) {
-        // Save the new token and its expiry time
-        writeFileSync(TOKENFILE, JSON.stringify(newToken));
-        return newToken.accessToken;
+    }
+
+    // Token is expired or about to expire, refresh it
+    console.log("Refreshing expired token...");
+    const newTokenData = await refreshAccessToken(refreshToken);
+
+    if (!newTokenData) {
+      throw new Error("Failed to refresh token");
+    }
+
+    writeFileSync(TOKENFILE, JSON.stringify(newTokenData));
+    return newTokenData.accessToken;
+
+  } catch (error) {
+    const server_path = resolve(__dirname, "../", "server.js")
+    const server = fork(server_path);
+    const sleep = async ms => new Promise(r => setTimeout(r, ms));
+  
+    await sleep(2000); // If I dont use this I get a weird race condition
+  
+    return new Promise(async (resolve, reject) => {
+      const login = await loginToSpotify();
+      if (!login) {
+        server.kill()
+        reject(new Error("Failed to login"));
+        return;
       }
-    }
-  }
-
-  // try {
-  //   await killPort(3000);
-  // } catch (error) {
-  //   console.error(`Error killing process on port 3000: ${error.message}`);
-  // }
-
-  const server_path = resolve(__dirname, "../", "server.js")
-  const server = fork(server_path);
-  const sleep = async ms => new Promise(r => setTimeout(r, ms));
-
-  await sleep(2000); // If I dont use this I get a weird race condition
-
-  return new Promise(async (resolve, reject) => {
-    const login = await loginToSpotify();
-    if (!login) {
-      server.kill()
-      reject(new Error("Failed to login"));
-      return;
-    }
-
-    server.on("message", async (authorization_code) => {
-      console.log("Authorization code received");
-      writeFileSync(TOKENFILE, JSON.stringify(authorization_code));
-      server.kill();
-      const newAccessToken = authorization_code.accessToken;
-      resolve(newAccessToken);
+    // try {
+    //   await killPort(3000);
+    // } catch (error) {
+    //   console.error(`Error killing process on port 3000: ${error.message}`);
+    // }
+      server.on("message", async (authorization_code) => {
+        console.log("Authorization code received");
+        writeFileSync(TOKENFILE, JSON.stringify(authorization_code));
+        server.kill();
+        const newAccessToken = authorization_code.accessToken;
+        resolve(newAccessToken);
+      });
     });
-  });
+  }
 }
 
 /**
@@ -468,6 +484,16 @@ const fetchPlaylists = async (accessToken, page_size = -1) => {
     }
 
     playlists = playlists.filter(playlist => playlist !== null);
+
+    const liked = await fetchLikedTracks(accessToken)
+
+    playlists.push({
+      name: "Liked Songs",
+      id: 'liked-songs',
+      tracks: liked,
+      description: "All your liked songs in one single playlist"
+    })
+
     return playlists;
   } catch (error) {
     console.error("Error fetching playlists:", error.message);
@@ -490,6 +516,17 @@ const fetchAlbums = async accessToken => {
   }
 };
 
+/**
+ * Asynchronous function to fetch liked tracks from Spotify.
+ * 
+ * This function retrieves the user's liked tracks from Spotify using pagination.
+ * It continues fetching tracks until all are retrieved or the specified page size is reached.
+ * 
+ * @param {string} accessToken - The access token for Spotify API authentication.
+ * @param {number} [pageSize=-1] - The total number of tracks to fetch. If set to -1, fetches all tracks.
+ * @returns {Promise<Array>} - A promise that resolves to an array of liked tracks.
+ * @throws {Error} - Throws an error if the request to fetch tracks fails.
+ */
 const fetchLikedTracks = async (accessToken, pageSize = -1) => {
   try {
     const maxPageSize = 50;
@@ -830,7 +867,11 @@ const killPort = (port) => {
 
     exec(command, (error, stdout) => {
       if (error) {
-        return reject(error);
+        // If the error is due to no processes found, we can ignore it
+        if (stdout.trim() === '') {
+          return resolve(); // No processes found, resolve without error
+        }
+        return reject(error); // Some other error occurred
       }
 
       const pids = stdout.split('\n').filter(Boolean);
@@ -871,5 +912,6 @@ export {
   getAuthToken,
   printHeader,
   killPort,
+  refreshAccessToken,
   navigateSpotifyTracks
 };

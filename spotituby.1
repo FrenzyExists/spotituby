@@ -16,19 +16,16 @@ is a command-line tool for downloading music from Spotify playlists.
 Subsequent runs or advanced users can utilize various options to specify playlists, filter content, and set download directories.
 .SH OPTIONS
 .TP
-.BI \--mode
-Specifies what the mode this operates. There are two modes: 
-
-.B \--mode\ cli - CLI mode runs the program like a normal command-line tool.
+.B cli - CLI mode runs the program like a normal command-line tool.
 
 Options for CLI mode:
 
 .TP
-\fBspotituby --mode cli\fR
+\fBspotituby cli\fR
 Runs the interactive wizard, connecting to your Spotify account. It loads the user’s playlists, allowing you to download all songs or select specific tracks from a playlist.
 
 .TP
-\fBspotituby --mode cli --url\fR
+\fBspotituby cli --url\fR
 Runs the wizard but retrieves songs based on a provided URL. Supported URLs include:
 
 - Playlists (entire playlist or specific songs):
@@ -40,7 +37,7 @@ Runs the wizard but retrieves songs based on a provided URL. Supported URLs incl
   \fIhttps://open.spotify.com/track/2qSkIjg1o9h3YT9RAgYN75?si=ed861f014f28453d\fR
 
 .TP
-\fBspotituby --mode cli --path\fR \fI<directory_path>\fR
+\fBspotituby cli --path\fR \fI<directory_path>\fR
 Runs the wizard but saves downloaded songs to the specified directory instead of the default \fI$HOME/Music\fR.
 
 .SH NOTES

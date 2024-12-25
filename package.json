@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "app": "lsof -i :3000 -t | xargs kill && source ./.venv/bin/activate && node --no-warnings ./index.js",
-    "postinstall": "node scripts/setup.js",
+    "setup": "node scripts/setup.js",
     "start": "node index.js"
   },
   "repository": {

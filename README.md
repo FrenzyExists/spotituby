@@ -96,10 +96,10 @@ Before you begin, ensure you have the following installed:
 
 ```bash
 # Download from Spotify playlist
-spotituby --mode cli --url https://open.spotify.com/playlist/37i9dQZF1DX5Ejj0EkURtP
+spotituby cli --url https://open.spotify.com/playlist/37i9dQZF1DX5Ejj0EkURtP
 
 # Download from YouTube playlist
-spotituby --mode cli --url https://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji
+spotituby cli --url https://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji
 
 # Reset credentials
 spotituby --reset
@@ -111,7 +111,7 @@ spotituby --reset
 <summary>📥 Downloading Playlists</summary>
 
 ```bash
-spotituby --mode cli
+spotituby cli
 # Follow the interactive prompts to:
 # 1. Select a playlist
 # 2. Choose tracks
@@ -126,8 +126,8 @@ spotituby --mode cli
 # Reset stored credentials
 spotituby --reset
 
-# Force new login
-spotituby --mode cli
+# Start on CLI Mode
+spotituby cli
 ```
 </details>
 

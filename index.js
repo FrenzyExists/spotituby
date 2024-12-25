@@ -7,7 +7,6 @@ import {
   identifyUrlType,
   fetchMe,
   fetchPlaylists,
-  fetchPlaylistTracks,
   searchAndDownloadYTTrack,
   trackSelector,
   TOKENFILE,
@@ -32,9 +31,10 @@ import {
   fork,
   spawn
 } from "child_process";
-import fs from "fs";
 import os from "os";
-import SyncDaemon from "./src/utils/sync.js";
+import { startPlaylistSync } from "./src/utils/sync.js";
+import { blue, bold, clr, cyan, green, italic, red, yellow } from "./src/utils/colors.js";
+
 
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -128,19 +128,10 @@ const navigateSpotify = async (token) => {
   }
 
   const user = await fetchMe(token);
-  console.log(`welcome ${user.display_name}`);
+  
+  console.log(`🎉 Welcome ${cyan}${user.display_name}${clr}! 🎉`);
 
-  let playlists = await fetchPlaylists(token);
-
-  const liked = await fetchLikedTracks(token)
-  // let l = liked.items.map(tr => tr.track)
-
-  playlists.push({
-    name: "Liked Songs",
-    id: 'liked-songs',
-    tracks: liked,
-    description: "All your liked songs in one single playlist"
-  })
+  const playlists = await fetchPlaylists(token);
 
   let choices = [];
   let n = 1
@@ -258,73 +249,57 @@ const cliMode = async (url, download_path = `${HOME}/Music`) => {
  * @returns {void}
  */
 const main = () => {
-  console.clear()
+  console.clear();
   printHeader();
 
   const program = new Command();
+
+  // Define the command for CLI mode
   program
-    .name(`\x1b[34mspotituby\x1b[0m`)
-    .description(`\x1b[33mDownload music from Spotify playlists\x1b[0m`)
-    .version("1.0.0")
-    .option("--mode <mode>", "Mode to run the app in (cli/sync)")
-    .option(
-      "--url <url>",
-      "URL to process (YouTube or Spotify) playlist or track"
-    )
-    .option(
-      "--reset",
-      "Reset stored credentials and start fresh"
-    )
+    .command('cli')
+    .description('Run the app in CLI mode')
+    .option("--url <url>", "URL to process (YouTube or Spotify) playlist or track")
+    .option("--reset", "Reset stored credentials and start fresh")
     .option("--watch-dir <dir>", "Directory to watch for music files", `${HOME}/Music`)
     .option("--interval <minutes>", "Sync interval in minutes", "30")
-    .addHelpText(
-      "after",
-      `
-    Examples:
-    \x1b[34mspotituby \x1b[33m--mode \x1b[31mcli\x1b[0m
-    \x1b[34mspotituby \x1b[33m--mode \x1b[31mcli \x1b[33m--url \x1b[31mhttps://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI\x1b[0m
-    \x1b[34mspotituby \x1b[33m--mode \x1b[31mcli \x1b[33m--url \x1b[31mhttps://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji\x1b[0m
-    \x1b[34mspotituby \x1b[33m--reset\x1b[0m    # Reset stored credentials
+    .action((options) => {
+      // Handle CLI mode logic here
+      cliMode(options.url, options.watchDir);
+    });
+
+  // Define the command for Sync mode
+  program
+    .command('sync')
+    .description('Run the app in Sync mode')
+    .option("--watch-dir <dir>", "Directory to watch for music files", `${HOME}/Music`)
+    .option("--interval <minutes>", "Sync interval in minutes", "30")
+    .action((options) => {
+      // Handle Sync mode logic here
+      const watchDir = options.watchDir || `${HOME}/Downloads`;
+      const interval = parseInt(options.interval) || 30;
+      startPlaylistSync(watchDir, interval);
+    });
+
+  // Set the program version and name
+  program
+    .name(`${blue}${bold}spotituby${clr}`)
+    .description(`${yellow}${italic}Download music from Spotify playlists${clr}`)
+    .version("1.0.0");
+
+  // Add help text for examples
+  program.addHelpText(
+    "after",
     `
-    );
+Examples:
+${blue}spotituby cli ${yellow}--url ${green}https://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI${clr}
+${blue}spotituby cli ${yellow}--reset${clr}    # Reset stored credentials
+${blue}spotituby sync ${yellow}--watch-dir ${green}/path/to/watch${clr}
+`
+  );
 
+  // Parse the command line arguments
   program.parse(process.argv);
-
-  const options = program.opts();
-  const mode = options.mode;
-  const url = options.url;
-  const download_path = options.path;
-  const reset = options.reset;
-
-  // Handle reset option
-  if (reset) {
-    try {
-      if (fs.existsSync(TOKENFILE)) {
-        fs.unlinkSync(TOKENFILE);
-        console.log('\x1b[32m%s\x1b[0m', '✔ Credentials reset successfully');
-      } else {
-        console.log('\x1b[33m%s\x1b[0m', 'ℹ No stored credentials found');
-      }
-      process.exit(0);
-    } catch (error) {
-      console.error('\x1b[31m%s\x1b[0m', '✘ Error resetting credentials:', error.message);
-      process.exit(1);
-    }
-  }
-
-  if (mode === "cli") {
-    cliMode(url, download_path);
-  } else if (mode === "sync") {
-    // TODO: implement daemon mode for v1.0.3
-    const watchDir = options.watchDir || `${HOME}/Downloads`;
-    const interval = parseInt(options.interval) || 30;
-
-    // const daemon = new SyncDaemon(watchDir, interval);
-    // daemon.start()
-
-  } else {
-    program.outputHelp();
-  }
 };
 
+// Call the main function
 main();

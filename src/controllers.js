@@ -13,6 +13,7 @@ SpotitubeController.postMyCredentialsLogin = (req, res) => {
       client_id: client_id,
       scope: scope,
       redirect_uri: redirectUri,
+      show_dialog: true
     }
   )}`;
 
