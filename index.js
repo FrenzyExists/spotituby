@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import axios from "axios";
 import {
   select,
 } from "@inquirer/prompts";
@@ -9,8 +10,6 @@ import {
   fetchPlaylists,
   searchAndDownloadYTTrack,
   trackSelector,
-  TOKENFILE,
-  fetchLikedTracks,
   printHeader,
   getAuthToken,
   killPort,
@@ -33,9 +32,7 @@ import {
 } from "child_process";
 import os from "os";
 import { startPlaylistSync } from "./src/utils/sync.js";
-import { blue, bold, clr, cyan, green, italic, red, yellow } from "./src/utils/colors.js";
-
-
+import { blue, bold, clr, cyan, green, italic, yellow } from "./src/utils/colors.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -72,7 +69,7 @@ const getYTPlaylist = async (url, outputDir) => {
 
     process.on("SIGTERM", () => {
       process.kill();
-    });
+    }); 
 
     process.on("SIGINT", () => {
       process.kill();
@@ -111,7 +108,7 @@ const getYTPlaylist = async (url, outputDir) => {
   }
 };
 
-
+ 
 const downloadWithYtDlp = (url, outputDir, yt_type) => {
   if (yt_type === "yt-playlist") {
     getYTPlaylist(url, outputDir);
@@ -160,51 +157,7 @@ const navigateSpotify = async (token) => {
 };
 
 
-/**
- * @deprecated This function is deprecated and should never be used.
- * It is intended to be removed in a future version.
- * 
- * Initiates a server in server mode.
- * 
- * @param {string} url - The URL to initiate the server with.
- * @returns {void}
- */
-const serverMode = (url) => {
-  console.log("Initiating server...");
-  const server = spawn("node", [serverPath]);
-
-  server.on("spawn", () => {
-    console.log(
-      "Server started\nlog in to your spotify account on http://localhost:3000/login"
-    );
-  });
-
-  server.on("message", async (authorizationCode) => {
-    // console.log(`Authorization code received: ${authorizationCode}`);
-    console.log("Authorization code received");
-    token = authorizationCode;
-    console.log("Visit http://localhost:3000/login");
-  });
-
-  server.on("SIGTERM", () => {
-    console.log("Server shutting down...");
-    process.exit(0);
-  });
-
-  server.stdout.on("data", (data) => {
-    console.log(data.toString());
-  });
-
-  server.on("close", () => {
-    console.log("Server closed");
-  });
-};
-
-//////////////////////////////////////////////////////////////////////////////
-
-
 const cliMode = async (url, download_path = `${HOME}/Music`) => {
-
   const urlMode = identifyUrlType(url);
 
   // Kill any process running on port 3000 before starting the server
@@ -222,7 +175,6 @@ const cliMode = async (url, download_path = `${HOME}/Music`) => {
     urlMode === "sy-track" ||
     urlMode === null
   ) {
-
     const playlist = await navigateSpotify(accessToken);
     
     let total = playlist.tracks.total;
@@ -253,6 +205,16 @@ const main = () => {
   printHeader();
 
   const program = new Command();
+  axios.request('https://google.com').catch(function(error) {
+    if (!error.response) {
+      // network error (server is down or no internet)
+    } else {
+      // http status code
+      const code = error.response.status
+      // data from server while error
+      const response = error.response.data
+    }
+  });
 
   // Define the command for CLI mode
   program

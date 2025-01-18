@@ -6,7 +6,8 @@
   "scripts": {
     "app": "lsof -i :3000 -t | xargs kill && source ./.venv/bin/activate && node --no-warnings ./index.js",
     "setup": "node scripts/setup.js",
-    "start": "node index.js"
+    "start": "node index.js",
+    "doc": "jsdoc2md src/utils/index.js >  API.md"
   },
   "repository": {
     "type": "git",
@@ -16,7 +17,8 @@
   "license": "MIT",
   "description": "Download music from Spotify and Youtube playlists or tracks",
   "devDependencies": {
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "jsdoc-to-markdown": "^9.1.1"
   },
   "bin": {
     "spotituby": "./bin/spotituby.js"
