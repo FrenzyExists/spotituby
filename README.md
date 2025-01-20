@@ -13,20 +13,7 @@
 
 ## ✨ Features
 
-🎵 **Spotify Integration**
-- Download tracks from your favorite playlists
-- Access your liked songs
-- Smart track selection with metadata preservation
-
-🎬 **YouTube Support**
-- Download from YouTube playlists or single videos
-- High-quality audio conversion
-- Automatic metadata tagging
-
-🚀 **Easy to Use**
-- Simple CLI interface
-- Cross-platform support (Windows, macOS, Linux)
-- Fast and efficient downloads
+- Do not use, implementations in progress...
 
 ## 🚀 Quick Start
 
@@ -40,11 +27,6 @@ Before you begin, ensure you have the following installed:
 - **Node.js & npm** - [Download](https://nodejs.org)
   ```bash
   node --version  # Should be >= 14
-  ```
-
-- **Python 3** - [Download](https://python.org)
-  ```bash
-  python3 --version  # Should be >= 3.12
   ```
 
 - **yt-dlp** - For YouTube downloads
@@ -62,25 +44,15 @@ Before you begin, ensure you have the following installed:
 ### 🔧 Installation
 
 1. **Install from npm**
-   ```bash
-   npm install -g spotituby
-   ```
-
-   Or clone and build:
-   ```bash
-   git clone https://github.com/FrenzyExists/spotituby.git
-   cd spotituby
-   ./install.sh
-   ```
 
 2. **Configure Spotify API**
-   
+
    Create a `.env` file:
    ```env
    SPOTIFY_CLIENT_ID=your_client_id
    SPOTIFY_CLIENT_SECRET=your_client_secret
    ```
-   
+
    <details>
    <summary>🔑 How to get Spotify credentials</summary>
    
@@ -94,41 +66,14 @@ Before you begin, ensure you have the following installed:
 
 ### Basic Commands
 
-```bash
-# Download from Spotify playlist
-spotituby cli --url https://open.spotify.com/playlist/37i9dQZF1DX5Ejj0EkURtP
-
-# Download from YouTube playlist
-spotituby cli --url https://www.youtube.com/playlist?list=PLv9ZK9k7ZDjW5mDlMQm4eMjR4kxY9e8Ji
-
-# Reset credentials
-spotituby --reset
-```
-
 ### 🎨 Features in Action
 
 <details>
 <summary>📥 Downloading Playlists</summary>
-
-```bash
-spotituby cli
-# Follow the interactive prompts to:
-# 1. Select a playlist
-# 2. Choose tracks
-# 3. Download and convert
-```
 </details>
 
 <details>
 <summary>🔄 Managing Authentication</summary>
-
-```bash
-# Reset stored credentials
-spotituby --reset
-
-# Start on CLI Mode
-spotituby cli
-```
 </details>
 
 ## 🤝 Contributing
@@ -158,3 +103,12 @@ Detective Pikachu - [@Not__Pikachu](https://twitter.com/Not__Pikachu)
 <div align="center">
 Made with ❤️ by <a href="https://github.com/FrenzyExists">FrenzyExists</a>
 </div>
+
+
+
+## Notes
+
+Made in Heaven Branch
+
+This branch has the entire API being written from scratch. Reason I had to do this is because I'm having trouble trying to implement the sync mode and realized I needed to rewrite many functions that were intertwined with the CLI functionality and then realized the codebase was frankly quite messy. Another thing I noticed was that with the old codebase the CLI was fine, but there was no flexibility if I wanted to use this as a library. One of my goals for this project is to use it on something like spicetify and not being able to use it as a library made it a problem.
+
