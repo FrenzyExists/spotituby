@@ -2,6 +2,7 @@
 
 import Url from "../utils/url.js";
 import Songs from "../utils/songs.js";
+import { HOME, readToken } from '../utils.js'
 import {
   confirm, checkbox,
   input,
@@ -9,11 +10,25 @@ import {
   select
 } from "@inquirer/prompts";
 import SpotifyManager from "../utils/spotify.js";
+import Colors from "../utils/colors.js";
+import YoutubeManager from "../utils/youtube.js";
 
 const CLIMode = class {
-  constructor(download_path, options) {
-    this.download_path = download_path;
+  /**
+   * 
+   * @param {String} url 
+   * @param {Object} options 
+   * 
+   * options
+   * - dir
+   * - reset
+   */
+  constructor(url, options) {
     this.options = options;
+    this.options.dir = this.options?.dir || `${HOME}/Downloads`;
+    this.url = url;
+    // console.log(this.options);
+    // console.log(this.url);
   }
 
   /**
@@ -110,9 +125,9 @@ const CLIMode = class {
     return selectedTracks;
   }
 
-  execute = async (url = this.url, download_path = this.download_path) => {
+  execute = async (url = this.url, download_path = this.options.dir) => {
+    // get modes    
     const mode = Url.identifyUrlType(url);
- 
     // Step 1: verify the url
     // |- YT url: 
     // |  |- Download with available YT metadata
@@ -122,13 +137,54 @@ const CLIMode = class {
     // |  |- Download personal playlist, locgin required
     // |- No URL, run wizard
     // Step 2:
-    // If Downloading from URL and is a playlist ask if download all playlist or select
-    // If Wizard connect to personal account and show playlists. Liked songs is treated as a playlist too.
+    // |- If Downloading from URL and is a playlist ask if download all playlist or select
+    // |- If Wizard connect to personal account and show playlists. Liked songs is treated as a playlist too.
     // Step 2a: (Wizard or playlist URL) Download all playlist or select which to download
     // Step 2b: (Wizard or playlist URL) Download all songs on playlist or select which
     // Step 3: Download and be done
+    // const token = await readToken();
+    const SPmanager = new SpotifyManager();
+    const YTmanager = new YoutubeManager();
 
-    // const spot = new SpotifyManager();
+    // Step 0: Spotify Auth. If not already authenticated, fetch a new token    
+    await SPmanager.fetchAuthToken();
+    await SPmanager.validateAuthToken();
+
+    // Step 1: verify the url
+    switch (mode) {
+      case Url.type.YT_TRACK:
+        // Add logic to handle YouTube track download
+        console.log(`Downloading ${Colors.red}YouTube${Colors.clr} track...`);
+        const details = await YTmanager.fetchSongDetails(url);
+        console.log(`Found ${Colors.green}${details[0]}${Colors.clr} by ${Colors.yellow}${details[1].join(' & ')}${Colors.clr} released in ${Colors.blue}${details[2]}${Colors.clr}`);
+
+        // Retrieve Details from Spotify. The reason we want the ones from Spotify and not Youtube is because Spotify has more accurate metadata of a song
+        // await SPmanager.fetchSongSearch(`${details[0]} - ${details[1].join(' & ')}`)
+
+        break;
+      case Url.type.YT_PLAYLIST:
+        console.log(`Downloading ${Colors.red}YouTube${Colors.clr} playlist...`);
+        // Add logic to handle YouTube playlist download
+        break;
+      case Url.type.SY_TRACK:
+        console.log(`Downloading ${Colors.green}Spotify${Colors.clr} track...`);
+        // Add logic to handle Spotify track download
+        break;
+      case Url.type.SY_PLAYLIST:
+        console.log(`Downloading ${Colors.green}Spotify${Colors.clr} playlist...`);
+        // Add logic to handle Spotify playlist download
+        break;
+      default:
+        console.log(`Executing ${Colors.yellow}Wizard${Colors.clr}...`);
+
+        // Handle unsupported URL types or no URL
+        // This mode triggers the wizard
+        // this wizard attempts to connect to the spotify of the user
+        // then gets and updates the credentials
+        break;
+    }
+
+
 
   }
   // getAllTracks

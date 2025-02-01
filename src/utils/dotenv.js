@@ -6,3 +6,4 @@ export const client_id = process.env.SPOTIFY_CLIENT_ID;
 export const secret = process.env.SPOTIFY_CLIENT_SECRET;
 export const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
 export const scope = process.env.SPOTIFY_SCOPE;
+export const geniusAccessToken = process.env.GENIUS_ACCESS_TOKEN;

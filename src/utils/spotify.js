@@ -1,19 +1,26 @@
 import { readFileSync, existsSync, writeFileSync } from 'fs';
+import { GENIUS_API_BASE_URL, TOKENFILE } from '../utils.js';
+import { client_id, secret, redirectUri, scope } from "./dotenv.js";
+import axios from 'axios';
+import querystring from 'querystring';
+
 
 const SpotifyManager = class {
   /**
    * 
    * @param {Object} token 
    */
-  constructor(token = null) {
+  constructor(token = null, email = null, password = null) {
     this.accessToken = null;
     this.token = token;
+    this.email = email;
+    this.password = password;
   }
 
   /**
    * 
-   * @param {*} page_size 
-   * @param {*} include_liked_songs 
+   * @param {number} page_size 
+   * @param {boolean} include_liked_songs 
    */
   fetchUserPlaylists = async (page_size = -1, include_liked_songs = true) => {
     let playlists = [];
@@ -78,14 +85,6 @@ const SpotifyManager = class {
     } catch (e) {
       console.error("Error fetching playlist tracks:", e.message);
       throw e;
-    }
-  }
-
-  fetchPlaylist = async (page_size = -1) => {
-    try {
-
-    } catch (e) {
-
     }
   }
 
@@ -191,7 +190,7 @@ const SpotifyManager = class {
     return t;
   }
 
-  fetchTrackDetails = async (trackId, token = null) => {
+  fetchSongDetails = async (trackId, token = null) => {
     try {
       // Determine the token to validate
       const t = this._token_get(token);
@@ -212,7 +211,7 @@ const SpotifyManager = class {
       // Return the track details
       return response.data;
     } catch (e) {
-      console.error("Error fetching track details:", error.e);
+      console.error("Error fetching track details:", e);
       throw e;
     }
   };
@@ -225,15 +224,194 @@ const SpotifyManager = class {
         }
         this.token = JSON.parse(readFileSync(TOKENFILE, "utf-8"));
 
-
+        const { accessToken, refreshToken, expiresAt } = this.token;
+        if (!accessToken || !refreshToken || !expiresAt) {
+          throw new Error("Token file is missing required properties: accessToken, refreshToken, or expiresAt.");
+        }
+        // console.log(this.token);
+        return { accessToken, refreshToken, expiresAt };
       } catch (e) {
-
+        console.error('Error reading token:');
+        throw e;
       }
     }
 
   }
-  refreshAuthToken = async (token = null) => {
 
+  refreshAuthToken = async (refreshToken = null) => {
+    try {
+      const tokenResponse = await axios.post(
+        "https://accounts.spotify.com/api/token",
+        querystring.stringify({
+          grant_type: "refresh_token",
+          refresh_token: refreshToken,
+          client_id: client_id,
+          client_secret: secret
+        }),
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        }
+      );
+      console.log("REFRESH", tokenResponse.data);
+
+      const newAccessToken = tokenResponse.data.access_token;
+      const expiresIn = tokenResponse.data.expires_in;
+      const expiresAt = Date.now() + expiresIn * 1000; // Calculate expiry time in milliseconds
+
+      return {
+        accessToken: newAccessToken,
+        refreshToken: refreshToken,
+        expiresIn: expiresIn,
+        expiresAt: expiresAt
+      };
+    } catch (error) {
+      console.error("Error refreshing access token:", error.message);
+      return null;
+    }
+  }
+
+
+  loginToSpotify = async (email, password) => {
+    try {
+      browser = await puppeteer.launch({
+        headless: true
+      });
+      const page = await browser.newPage();
+      await page.goto('http://localhost:3000/login');
+
+      // Wait for the username and password fields to load
+      await page.waitForSelector('#login-username', {
+        visible: true
+      });
+      await page.waitForSelector('#login-password', {
+        visible: true
+      });
+
+      // Fill in the login form and submit
+      await page.type('#login-username', email);
+      await page.type('#login-password', password);
+
+      // Click the login button
+      await page.click('#login-button');
+
+      console.log("Logging in...");
+
+      try {
+        console.log("Authorizing app to spotify account...");
+        // Wait for navigation
+        await page.waitForNavigation();
+
+        // Wait for the selector
+        await page.waitForSelector('.Button-sc-qlcn5g-0.hVnPpH', {
+          timeout: 5000,
+        });
+        // Click the button
+        await page.click('.Button-sc-qlcn5g-0.hVnPpH');
+      } catch (e) { } // ignore
+
+      try {
+        const errorMessage = await page.waitForSelector('.sc-gLXSEc.eZHyFP', {
+          visible: true,
+          timeout: 2000
+        }).catch(() => null);
+        if (errorMessage) {
+          console.log('Login failed. Please check your credentials.');
+          await browser.close();
+          return false;
+        } else {
+          console.log(`${green}Login successful!${clr}`);
+          await browser.close();
+          return true;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    } catch (e) {
+      if (e instanceof TimeoutError) {
+        console.log('Login successful!');
+        await browser.close();
+        return true;
+      } else {
+        console.log(e);
+        await browser.close();
+        return false;
+      }
+    }
+  }
+
+  fetchSongSearch = async (query, token = null) => {
+    try {
+      const t = this._token_get(token);
+      const { accessToken } = t;
+
+      if (!query || typeof query !== 'string') {
+        throw new Error('Search query must be a non-empty string');
+      }
+
+      const response = await axios.get('https://api.spotify.com/v1/search', {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        },
+        params: {
+          q: query,
+          type: 'track',
+          limit: 10
+        }
+      });
+
+      const tracks = response.data.tracks.items;
+
+      if (tracks.length === 0) {
+        return {
+          success: false,
+          message: 'No songs found matching your search query',
+          isLikelySong: false,
+          tracks: []
+        };
+      }
+      return tracks[0];
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
+  /**
+   * Fetch lyrics for a given track
+   * @param {string} trackName - The name of the track
+   * @param {string} artistName - The name of the artist
+   * @returns {Promise<string>} - The lyrics of the song
+   */
+  fetchLyrics = async (trackName, artistName) => {
+    try {
+      // Search for the song on Genius
+      const searchResponse = await axios.get(`${GENIUS_API_BASE_URL}/search`, {
+        headers: {
+          'Authorization': `Bearer ${geniusAccessToken}`
+        },
+        params: {
+          q: `${trackName} ${artistName}`
+        }
+      });
+
+      if (!searchResponse.data.response.hits.length) {
+        throw new Error('No lyrics found for this song');
+      }
+
+      // Get the first hit's URL
+      const songUrl = searchResponse.data.response.hits[0].result.url;
+
+      // Fetch the webpage containing lyrics
+      const response = await axios.get(songUrl);
+
+      // Note: You'll need to parse the HTML to extract lyrics
+      // This is a simplified example - you might want to use a proper HTML parser
+      return `Lyrics can be found at: ${songUrl}`;
+    } catch (error) {
+      console.error('Error fetching lyrics:', error);
+      throw error;
+    }
   }
 }
 

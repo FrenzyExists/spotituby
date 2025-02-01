@@ -67,9 +67,8 @@ const checkInternet = () => {
  * @returns {void}
  */
 const main = () => {
-  // console.clear();
-  checkInternet();
-  printHeader();
+  checkInternet(); // Checks if you have any connection. Without internet you can't use this
+  printHeader();   // Intro
   const program = new Command();
 
   // Add help text for examples
@@ -85,16 +84,13 @@ const main = () => {
 
   // Define the command for CLI mode
   program
-    .command('cli')
-    .description('Run the app in CLI mode')
-    .option("--url <url>", "URL to process (YouTube or Spotify) playlist or track")
-    .option("--reset", "Reset stored credentials and start fresh")
-    .option("--watch-dir <dir>", "Directory to watch for music files", `${HOME}/Music`)
-    .option("--interval <minutes>", "Sync interval in minutes", "30")
-    .action((options, destination) => {
+    .command('cli [url]')  // Made URL optional by changing '<url> ' to '[url]'
+    .description('Run the app in CLI mode. Can optionally provide a URL (YouTube or Spotify) playlist or track')
+    .option("--reset", "Reset stored credentials and start fresh", false)
+    .option("--dir <music_dir>", "Directory to watch for music files", `${HOME}/Music`)
+    .action((url, options) => {
       // Handle CLI mode logic here
-      const watchDir = options.watchDir || `${HOME}/Downloads`;
-      const CLI = new CLIMode(watchDir, options);
+      const CLI = new CLIMode(url, options);
       return CLI.execute();
     });
 

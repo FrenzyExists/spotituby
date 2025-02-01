@@ -1,3 +1,4 @@
+import validUrl from "valid-url";
 
 
 const Url = class { };
@@ -66,9 +67,20 @@ const UrlType = Object.freeze({
   SY_PLAYLIST: 'sy-playlist',
 });
 
+// extracts id from youtube and spotify urls
+const extractId = url => {
+  const parsedUrl = new URL(url);
+  // https://open.spotify.com/track/14QaXYIK3K3QPtezqxRRPN?si=736546b969244eb2
+  // https://www.youtube.com/watch?v=I3pSk4FKMMQ"
+  const pathname = parsedUrl.pathname.split("/");
+  const pathID = pathname.at(1) === "track" ? pathname.at(2) : parsedUrl.searchParams.get("v")
+  return pathID;
+}
+
 Url.type = UrlType;
 Url.sanitizeArrays = sanitizeArrays;
 Url.sanitizeFileName = sanitizeFileName;
 Url.identifyUrlType = identifyUrlType;
+Url.extractId = extractId;
 
 export default Url;

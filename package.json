@@ -4,7 +4,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "app": "lsof -i :3000 -t | xargs kill && source ./.venv/bin/activate && node --no-warnings ./index.js",
+    "app": "lsof -i :3000 -t | xargs kill && source ./.venv/bin/activate && node --no-warnings ./src/setup.js",
     "setup": "node src/setup.js",
     "start": "node index.js",
     "doc": "jsdoc2md src/utils/index.js >  API.md"
