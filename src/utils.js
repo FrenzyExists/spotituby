@@ -75,9 +75,8 @@ const readToken = async (file = TOKENFILE) => {
  * @private
  */
 const writeMetadata = async (info, filepath) => {
-  // fetch image url
-  const img = await fetchImage(info.image);
 
+  console.log("Received artists", info.artist)
   const tags = {
     title: info.name,
     artist: info.artist.join(", "), // TPE1
@@ -89,7 +88,7 @@ const writeMetadata = async (info, filepath) => {
     length: `${Math.round(info.duration_ms / 1000)}`, // TLEN in seconds
     ISRC: info.isrc, // TSRC
     mediaType: "Digital", // TMED
-    APIC: img,
+    APIC: info.image,
     comment: info.explicit ? "Explicit content" : "Clean content", // COMM
     originalTitle: info.name // TOAL
   };

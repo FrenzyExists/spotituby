@@ -12,6 +12,7 @@ import {
 import SpotifyManager from "../utils/spotify.js";
 import Colors from "../utils/colors.js";
 import YoutubeManager from "../utils/youtube.js";
+import Track from "../track.js";
 
 const CLIMode = class {
   /**
@@ -180,7 +181,27 @@ const CLIMode = class {
         const image = await fetchImage(searchResults.tracks[0].album.images[0].url);
         
         // write metadata
-        // await writeMetadata()
+        let artists = [];
+        searchResults.tracks[0].artists.forEach(artist => {
+          artists.push(artist.name);
+        });
+        await writeMetadata(
+            {
+              name: searchResults.tracks[0].name,
+              artist: artists,
+              year: searchResults.tracks[0].album.release_date,
+              release_date: searchResults.tracks[0].album.release_date,
+              track_number: searchResults.tracks[0].track_number,
+              album: searchResults.tracks[0].album.name,
+              isrc: searchResults.tracks[0].isrc,
+              image: image,
+              duration_ms: searchResults.tracks[0].duration_ms,
+              explicit: searchResults.tracks[0].explicit
+            },
+            detailsYT.filepath
+        );
+
+        new Track(searchResults.tracks[0]);
 
         // await SPmanager.fetchSongSearch(`${detailsYT.track} - ${detailsYT.artists.join(' & ')}`);
         break;
