@@ -2,7 +2,7 @@
 
 import Url from "../utils/url.js";
 import Songs from "../utils/songs.js";
-import { HOME, readToken } from '../utils.js'
+import { fetchImage, HOME, readToken, writeMetadata } from '../utils.js'
 import {
   confirm, checkbox,
   input,
@@ -26,6 +26,7 @@ const CLIMode = class {
   constructor(url, options) {
     this.options = options;
     this.options.dir = this.options?.dir || `${HOME}/Downloads`;
+    this.options.downloadPath = this.options?.downloadPath || this.options.dir;
     this.url = url;
     // console.log(this.options);
     // console.log(this.url);
@@ -125,7 +126,7 @@ const CLIMode = class {
     return selectedTracks;
   }
 
-  execute = async (url = this.url, download_path = this.options.dir) => {
+  execute = async (url = this.url, download_path = this.options.downloadPath) => {
     // get modes    
     const mode = Url.identifyUrlType(url);
     // Step 1: verify the url
@@ -152,15 +153,36 @@ const CLIMode = class {
 
     // Step 1: verify the url
     switch (mode) {
-      case Url.type.YT_TRACK:
+      case Url.type.YT_TRACK: // YT URL
         // Add logic to handle YouTube track download
         console.log(`Downloading ${Colors.red}YouTube${Colors.clr} track...`);
-        const details = await YTmanager.fetchSongDetails(url);
-        console.log(`Found ${Colors.green}${details[0]}${Colors.clr} by ${Colors.yellow}${details[1].join(' & ')}${Colors.clr} released in ${Colors.blue}${details[2]}${Colors.clr}`);
-
+        const detailsYT = await YTmanager.fetchAudio(url, download_path);
+        // console.log(`Found ${Colors.green}${details.track}${Colors.clr} by ${Colors.yellow}${details.artists.join(' & ')}${Colors.clr} released in ${Colors.blue}${details.releaseYear}${Colors.clr}`);
+        
+        if (detailsYT) {
+          console.log(`Downloaded to: ${Colors.green}${detailsYT.filepath}${Colors.clr}`);
+          console.log(`File size: ${Colors.blue}${detailsYT.audioCodec}${Colors.clr}`);
+          console.log(`Audio quality: ${Colors.yellow}${detailsYT.audioBitrate}${Colors.clr} (${detailsYT.audioCodec})`);
+        }
+        console.log(detailsYT.artists, 'artists', typeof detailsYT.artists);
+        
         // Retrieve Details from Spotify. The reason we want the ones from Spotify and not Youtube is because Spotify has more accurate metadata of a song
-        // await SPmanager.fetchSongSearch(`${details[0]} - ${details[1].join(' & ')}`)
+        const searchResults = await SPmanager.fetchSongSearch(detailsYT.artists, detailsYT.track, detailsYT.album);
+        console.log(searchResults);
+        
+        if (!searchResults.success) {
+          console.log(`No song found matching your search query: ${Colors.red}${detailsYT.track} - ${detailsYT.artists.join(' & ')}${Colors.clr}`);
+          return;
+        }
+        // retrieve the image from Spotify
+        console.log("\n\nIMAGES\n\n-----\n", searchResults.tracks[0].album.images[0].url);
+        
+        const image = await fetchImage(searchResults.tracks[0].album.images[0].url);
+        
+        // write metadata
+        // await writeMetadata()
 
+        // await SPmanager.fetchSongSearch(`${detailsYT.track} - ${detailsYT.artists.join(' & ')}`);
         break;
       case Url.type.YT_PLAYLIST:
         console.log(`Downloading ${Colors.red}YouTube${Colors.clr} playlist...`);

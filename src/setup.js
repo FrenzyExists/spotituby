@@ -78,6 +78,7 @@ const main = () => {
   Examples:
   ${Colors.blue}spotituby cli ${Colors.yellow}--url ${Colors.green}https://open.spotify.com/playlist/4nT7b2XU4sVWp8Rt7A6WqI${Colors.clr}
   ${Colors.blue}spotituby cli ${Colors.yellow}--reset${Colors.clr}    # Reset stored credentials
+  ${Colors.blue}spotituby cli ${Colors.yellow}--download-path ${Colors.green}/path/to/downloads${Colors.clr}    # Specify download location
   ${Colors.blue}spotituby sync ${Colors.yellow}--watch-dir ${Colors.green}/path/to/watch${Colors.clr}
   `
   );
@@ -88,6 +89,7 @@ const main = () => {
     .description('Run the app in CLI mode. Can optionally provide a URL (YouTube or Spotify) playlist or track')
     .option("--reset", "Reset stored credentials and start fresh", false)
     .option("--dir <music_dir>", "Directory to watch for music files", `${HOME}/Music`)
+    .option("--download-path <path>", "Directory to save downloaded music files", `${HOME}/Downloads`)
     .action((url, options) => {
       // Handle CLI mode logic here
       const CLI = new CLIMode(url, options);

@@ -3,7 +3,8 @@
 import axios from "axios";
 import os from "os";
 import { fileURLToPath } from 'url';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync, writeFileSync } from 'fs';
+import NodeID3 from "node-id3";
 import {
   dirname,
   resolve
@@ -52,6 +53,53 @@ const readToken = async (file = TOKENFILE) => {
   }
 }
 
+
+/**
+ * Writes metadata tags to the specified music file.
+ *
+ * This function takes track information and a file path,
+ * then writes metadata tags such as title, artist, album,
+ * year, track number, and more to the music file.
+ *
+ * @param {object} info - An object containing metadata information about the track.
+ * @param {string} info.name - The title of the track.
+ * @param {string[]} info.artist - An array of artist names.
+ * @param {string} info.album - The album name of the track.
+ * @param {string} info.release_date - The release date of the track in YYYY-MM-DD format.
+ * @param {number} info.track_number - The track number in the album.
+ * @param {number} info.duration_ms - The duration of the track in milliseconds.
+ * @param {string} info.isrc - The International Standard Recording Code of the track.
+ * @param {string} info.image - URL to the image associated with the track.
+ * @param {boolean} info.explicit - Indicates if the track contains explicit content.
+ * @param {string} filepath - The path to the music file where metadata will be written.
+ * @private
+ */
+const writeMetadata = async (info, filepath) => {
+  // fetch image url
+  const img = await fetchImage(info.image);
+
+  const tags = {
+    title: info.name,
+    artist: info.artist.join(", "), // TPE1
+    album: info.album, // TALB
+    year: info.release_date.split("-")[0], // TYER
+    date: info.release_date.replace(/-/g, ""), // TDAT (Format: DDMM)
+    trackNumber: `${info.track_number}`, // TRCK
+    disc_number: info.disc_number,
+    length: `${Math.round(info.duration_ms / 1000)}`, // TLEN in seconds
+    ISRC: info.isrc, // TSRC
+    mediaType: "Digital", // TMED
+    APIC: img,
+    comment: info.explicit ? "Explicit content" : "Clean content", // COMM
+    originalTitle: info.name // TOAL
+  };
+
+  let f = filepath.replace(/\.[^/.]+$/, ".mp3");
+
+  NodeID3.update(tags, f, (e, buff) => { });
+};
+
+
 const executeCommand = (command) => {
   return new Promise((resolve, reject) => {
     const process = exec(command, (error, stdout, stderr) => {
@@ -75,5 +123,6 @@ export {
   GENIUS_API_BASE_URL,
   fetchImage,
   readToken,
-  executeCommand
+  executeCommand,
+  writeMetadata
 };
